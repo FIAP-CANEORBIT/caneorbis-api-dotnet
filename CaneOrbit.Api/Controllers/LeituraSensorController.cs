@@ -41,10 +41,10 @@ namespace CaneOrbis.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<LeituraSensor>> CriarLeitura(LeituraSensorCreateDto dto)
         {
-            var dispositivoExiste = await _context.DispositivosIot
-                .AnyAsync(d => d.IdDispositivo == dto.IdDispositivo);
+            var dispositivo = await _context.DispositivosIot
+    .FirstOrDefaultAsync(d => d.IdDispositivo == dto.IdDispositivo);
 
-            if (!dispositivoExiste)
+            if (dispositivo == null)
                 return BadRequest("Dispositivo informado não existe.");
 
             if (dto.VlUmidadeSolo < 0 || dto.VlTemperatura < 0)
@@ -61,7 +61,15 @@ namespace CaneOrbis.Api.Controllers
             _context.LeiturasSensor.Add(leitura);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetLeitura), new { id = leitura.IdLeitura }, leitura);
+            return CreatedAtAction(nameof(GetLeitura), new { id = leitura.IdLeitura }, new
+            {
+                leitura.IdLeitura,
+                leitura.IdDispositivo,
+                leitura.VlUmidadeSolo,
+                leitura.VlTemperatura,
+                leitura.VlPhSolo,
+                leitura.DtLeitura
+            });
         }
 
         [HttpPut("{id}")]
