@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using CaneOrbis.Api.DTOs;
 using CaneOrbis.Api.Models;
@@ -15,6 +16,75 @@ namespace CaneOrbis.Api.Services
         {
             _settings = settings.Value;
             _httpClient = new HttpClient();
+        }
+
+        public async Task<EosFieldResponseDto> CriarFieldAsync(
+            decimal latitude,
+            decimal longitude,
+            FieldCreateDto dto)
+        {
+            var delta = 0.001m;
+
+            var requestBody = new
+            {
+                type = "Feature",
+                properties = new
+                {
+                    name = dto.Nome,
+                    group = dto.Grupo,
+                    years_data = new[]
+                    {
+                        new
+                        {
+                            crop_type = dto.Cultura,
+                            year = dto.Ano,
+                            sowing_date = dto.DataPlantio?.ToString("yyyy-MM-dd")
+                        }
+                    }
+                },
+                geometry = new
+                {
+                    type = "Polygon",
+                    coordinates = new[]
+                    {
+                        new[]
+                        {
+                            new[] { (double)(longitude - delta), (double)(latitude - delta) },
+                            new[] { (double)(longitude + delta), (double)(latitude - delta) },
+                            new[] { (double)(longitude + delta), (double)(latitude + delta) },
+                            new[] { (double)(longitude - delta), (double)(latitude + delta) },
+                            new[] { (double)(longitude - delta), (double)(latitude - delta) }
+                        }
+                    }
+                }
+            };
+
+            var url = $"{_settings.BaseUrl}/field-management?api_key={_settings.ApiKey}";
+
+            var response = await _httpClient.PostAsJsonAsync(url, requestBody);
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new EosFieldResponseDto
+                {
+                    Mensagem = responseBody
+                };
+            }
+
+            using var document = JsonDocument.Parse(responseBody);
+            var root = document.RootElement;
+
+            return new EosFieldResponseDto
+            {
+                IdEosField = root.GetProperty("id").GetInt32(),
+                Area = root.TryGetProperty("area", out var areaElement)
+                    ? areaElement.GetDecimal()
+                    : null,
+                Nome = dto.Nome,
+                DataCriacao = DateTime.Now,
+                Mensagem = "Field criado com sucesso na EOS."
+            };
         }
 
         public async Task<EosNdviResponseDto> BuscarNdviAsync(decimal latitude, decimal longitude)
@@ -37,8 +107,12 @@ namespace CaneOrbis.Api.Services
 
                 var resultado = await ConsultarResultadoNdviAsync(taskId);
 
-                if (resultado.Status == "concluido" || resultado.Status == "sem_dados" || resultado.Status == "erro")
+                if (resultado.Status == "concluido" ||
+                    resultado.Status == "sem_dados" ||
+                    resultado.Status == "erro")
+                {
                     return resultado;
+                }
             }
 
             return new EosNdviResponseDto
@@ -53,7 +127,6 @@ namespace CaneOrbis.Api.Services
         {
             var lat = (double)latitude;
             var lon = (double)longitude;
-
             var delta = 0.001;
 
             var body = new
