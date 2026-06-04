@@ -85,21 +85,43 @@ namespace CaneOrbis.Api.Controllers
             if (dispositivo.VlLatitude == null || dispositivo.VlLongitude == null)
                 return BadRequest("Dispositivo não possui latitude e longitude cadastradas.");
 
-            var resultadoEos = await _eosService.BuscarNdviAsync(
+            if (dispositivo.IdField == null)
+                return BadRequest("Dispositivo ainda não está vinculado a um Field.");
+
+            var field = await _context.Fields
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.IdField == dispositivo.IdField.Value);
+
+            if (field == null)
+                return BadRequest("Field vinculado ao dispositivo não foi encontrado.");
+
+            if (field.IdEosField == null)
+                return BadRequest("Field vinculado ao dispositivo não possui ID da EOS.");
+
+            var resultadoNdvi = await _eosService.BuscarNdviAsync(
                 dispositivo.VlLatitude.Value,
                 dispositivo.VlLongitude.Value
             );
 
-            if (resultadoEos.Ndvi == null)
-                return BadRequest(resultadoEos.Mensagem);
+            if (resultadoNdvi.Ndvi == null)
+                return BadRequest(resultadoNdvi.Mensagem);
+
+            var resultadoWeather = await _eosService.BuscarWeatherAsync(field.IdEosField.Value);
+
+            if (resultadoWeather.Precipitacao == null &&
+                resultadoWeather.TemperaturaAr == null &&
+                string.IsNullOrWhiteSpace(resultadoWeather.CondicaoClima))
+            {
+                return BadRequest(resultadoWeather.Mensagem);
+            }
 
             var dadoSatelite = new DadoSatelite
             {
                 IdDispositivo = idDispositivo,
-                VlNdvi = resultadoEos.Ndvi,
-                VlPrecipitacao = null,
-                VlTemperaturaAr = null,
-                DsCondicaoClima = ClassificarVegetacao(resultadoEos.Ndvi.Value)
+                VlNdvi = resultadoNdvi.Ndvi,
+                VlPrecipitacao = resultadoWeather.Precipitacao,
+                VlTemperaturaAr = resultadoWeather.TemperaturaAr,
+                DsCondicaoClima = resultadoWeather.CondicaoClima
             };
 
             _context.DadosSatelite.Add(dadoSatelite);
@@ -147,17 +169,6 @@ namespace CaneOrbis.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private static string ClassificarVegetacao(decimal ndvi)
-        {
-            if (ndvi < 0) return "AGUA_OU_NUVEM";
-            if (ndvi < 0.2m) return "SOLO_EXPOSTO";
-            if (ndvi < 0.4m) return "VEGETACAO_FRACA";
-            if (ndvi < 0.6m) return "VEGETACAO_MODERADA";
-            if (ndvi < 0.8m) return "VEGETACAO_SAUDAVEL";
-
-            return "VEGETACAO_DENSA";
         }
     }
 }
