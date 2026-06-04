@@ -79,8 +79,8 @@ namespace CaneOrbis.Api.Services
             {
                 IdEosField = root.GetProperty("id").GetInt32(),
                 Area = root.TryGetProperty("area", out var areaElement)
-                    ? areaElement.GetDecimal()
-                    : null,
+    ? LerDecimalFlexivel(areaElement)
+    : null,
                 Nome = dto.Nome,
                 DataCriacao = DateTime.Now,
                 Mensagem = "Field criado com sucesso na EOS."
@@ -230,5 +230,23 @@ namespace CaneOrbis.Api.Services
                 Mensagem = "A resposta da EOS não retornou NDVI médio."
             };
         }
+        private static decimal? LerDecimalFlexivel(JsonElement element)
+        {
+            if (element.ValueKind == JsonValueKind.Number)
+                return element.GetDecimal();
+
+            if (element.ValueKind == JsonValueKind.String &&
+                decimal.TryParse(
+                    element.GetString(),
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out var valor))
+            {
+                return valor;
+            }
+
+            return null;
+        }
     }
+
 }
