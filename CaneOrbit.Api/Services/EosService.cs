@@ -171,7 +171,7 @@ namespace CaneOrbis.Api.Services
             {
                 Precipitacao = precipitacao,
                 TemperaturaAr = temperaturaAr,
-                CondicaoClima = condicaoClima,
+                CondicaoClima = condicaoClima?.Trim(),
                 Mensagem = "Weather obtido com sucesso."
             };
         }
