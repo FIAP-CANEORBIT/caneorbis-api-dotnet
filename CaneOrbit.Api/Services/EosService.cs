@@ -79,11 +79,100 @@ namespace CaneOrbis.Api.Services
             {
                 IdEosField = root.GetProperty("id").GetInt32(),
                 Area = root.TryGetProperty("area", out var areaElement)
-    ? LerDecimalFlexivel(areaElement)
-    : null,
+                    ? LerDecimalFlexivel(areaElement)
+                    : null,
                 Nome = dto.Nome,
                 DataCriacao = DateTime.Now,
                 Mensagem = "Field criado com sucesso na EOS."
+            };
+        }
+
+        public async Task<EosWeatherResponseDto> BuscarWeatherAsync(int idEosField)
+        {
+            var hoje = DateTime.UtcNow.Date;
+            var amanha = hoje.AddDays(1);
+
+            var requestBody = new
+            {
+                @params = new
+                {
+                    date_start = hoje.ToString("yyyy-MM-dd"),
+                    date_end = amanha.ToString("yyyy-MM-dd")
+                }
+            };
+
+            var url = $"{_settings.BaseUrl}/weather/forecast/{idEosField}";
+
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Headers.Add("x-api-key", _settings.ApiKey);
+
+            var json = JsonSerializer.Serialize(requestBody);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new EosWeatherResponseDto
+                {
+                    Mensagem = responseBody
+                };
+            }
+
+            using var document = JsonDocument.Parse(responseBody);
+            var root = document.RootElement;
+
+            if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() == 0)
+            {
+                return new EosWeatherResponseDto
+                {
+                    Mensagem = "A EOS não retornou previsão do tempo para este Field."
+                };
+            }
+
+            var primeiroDia = root[0];
+
+            if (!primeiroDia.TryGetProperty("forecast", out var forecastElement) ||
+                forecastElement.ValueKind != JsonValueKind.Array ||
+                forecastElement.GetArrayLength() == 0)
+            {
+                return new EosWeatherResponseDto
+                {
+                    Mensagem = "A EOS não retornou detalhes da previsão do tempo para este Field."
+                };
+            }
+
+            var primeiraPrevisao = forecastElement[0];
+
+            decimal? temperaturaAr = null;
+
+            var temperaturaMax = primeiraPrevisao.TryGetProperty("temperature_max", out var tempMaxElement)
+                ? LerDecimalFlexivel(tempMaxElement)
+                : null;
+
+            var temperaturaMin = primeiraPrevisao.TryGetProperty("temperature_min", out var tempMinElement)
+                ? LerDecimalFlexivel(tempMinElement)
+                : null;
+
+            if (temperaturaMax != null && temperaturaMin != null)
+                temperaturaAr = (temperaturaMax.Value + temperaturaMin.Value) / 2;
+
+            var precipitacao = primeiraPrevisao.TryGetProperty("precipitation", out var precipitacaoElement)
+                ? LerDecimalFlexivel(precipitacaoElement)
+                : null;
+
+            var condicaoClima = primeiraPrevisao.TryGetProperty("total_conditions", out var condicaoElement) &&
+                                condicaoElement.ValueKind == JsonValueKind.String
+                ? condicaoElement.GetString()
+                : null;
+
+            return new EosWeatherResponseDto
+            {
+                Precipitacao = precipitacao,
+                TemperaturaAr = temperaturaAr,
+                CondicaoClima = condicaoClima,
+                Mensagem = "Weather obtido com sucesso."
             };
         }
 
@@ -230,6 +319,7 @@ namespace CaneOrbis.Api.Services
                 Mensagem = "A resposta da EOS não retornou NDVI médio."
             };
         }
+
         private static decimal? LerDecimalFlexivel(JsonElement element)
         {
             if (element.ValueKind == JsonValueKind.Number)
@@ -248,5 +338,4 @@ namespace CaneOrbis.Api.Services
             return null;
         }
     }
-
 }
