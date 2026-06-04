@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace CaneOrbis.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260603185222_InitialCreate")]
+    [Migration("20260604023423_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -97,9 +97,9 @@ namespace CaneOrbis.Api.Migrations
                         .HasColumnName("DT_INSTALACAO")
                         .HasDefaultValueSql("SYSDATE");
 
-                    b.Property<int>("IdTalhao")
+                    b.Property<int?>("IdField")
                         .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_TALHAO");
+                        .HasColumnName("ID_FIELD");
 
                     b.Property<string>("NmApelido")
                         .HasMaxLength(50)
@@ -119,9 +119,49 @@ namespace CaneOrbis.Api.Migrations
                     b.HasIndex("DsMacAddress")
                         .IsUnique();
 
-                    b.HasIndex("IdTalhao");
+                    b.HasIndex("IdField");
 
                     b.ToTable("T_ORB_DISPOSITIVO_IOT", (string)null);
+                });
+
+            modelBuilder.Entity("CaneOrbis.Api.Models.Field", b =>
+                {
+                    b.Property<int>("IdField")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_FIELD");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdField"));
+
+                    b.Property<DateTime>("DtCriacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP")
+                        .HasColumnName("DT_CRIACAO")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int?>("IdEosField")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_EOS_FIELD");
+
+                    b.Property<int>("IdPropriedade")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_PROPRIEDADE");
+
+                    b.Property<string>("NmField")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("NM_FIELD");
+
+                    b.Property<decimal?>("VlAreaHectare")
+                        .HasColumnType("NUMBER(10,2)")
+                        .HasColumnName("VL_AREA_HECTARE");
+
+                    b.HasKey("IdField");
+
+                    b.HasIndex("IdPropriedade");
+
+                    b.ToTable("T_ORB_FIELD", (string)null);
                 });
 
             modelBuilder.Entity("CaneOrbis.Api.Models.LeituraSensor", b =>
@@ -197,49 +237,6 @@ namespace CaneOrbis.Api.Migrations
                     b.ToTable("T_ORB_PROPRIEDADE", (string)null);
                 });
 
-            modelBuilder.Entity("CaneOrbis.Api.Models.Talhao", b =>
-                {
-                    b.Property<int>("IdTalhao")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_TALHAO");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTalhao"));
-
-                    b.Property<string>("DsCultura")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(80)
-                        .HasColumnType("NVARCHAR2(80)")
-                        .HasDefaultValue("CANA_DE_ACUCAR")
-                        .HasColumnName("DS_CULTURA");
-
-                    b.Property<string>("DsTipoSolo")
-                        .HasMaxLength(80)
-                        .HasColumnType("NVARCHAR2(80)")
-                        .HasColumnName("DS_TIPO_SOLO");
-
-                    b.Property<int>("IdPropriedade")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_PROPRIEDADE");
-
-                    b.Property<string>("NmTalhao")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("NM_TALHAO");
-
-                    b.Property<decimal?>("VlAreaHectare")
-                        .HasColumnType("NUMBER(10,2)")
-                        .HasColumnName("VL_AREA_HECTARE");
-
-                    b.HasKey("IdTalhao");
-
-                    b.HasIndex("IdPropriedade");
-
-                    b.ToTable("T_ORB_TALHAO", (string)null);
-                });
-
             modelBuilder.Entity("CaneOrbis.Api.Models.Usuario", b =>
                 {
                     b.Property<int>("IdUsuario")
@@ -294,13 +291,22 @@ namespace CaneOrbis.Api.Migrations
 
             modelBuilder.Entity("CaneOrbis.Api.Models.DispositivoIot", b =>
                 {
-                    b.HasOne("CaneOrbis.Api.Models.Talhao", "Talhao")
+                    b.HasOne("CaneOrbis.Api.Models.Field", "Field")
                         .WithMany("DispositivosIot")
-                        .HasForeignKey("IdTalhao")
+                        .HasForeignKey("IdField");
+
+                    b.Navigation("Field");
+                });
+
+            modelBuilder.Entity("CaneOrbis.Api.Models.Field", b =>
+                {
+                    b.HasOne("CaneOrbis.Api.Models.Propriedade", "Propriedade")
+                        .WithMany("Fields")
+                        .HasForeignKey("IdPropriedade")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Talhao");
+                    b.Navigation("Propriedade");
                 });
 
             modelBuilder.Entity("CaneOrbis.Api.Models.LeituraSensor", b =>
@@ -325,17 +331,6 @@ namespace CaneOrbis.Api.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("CaneOrbis.Api.Models.Talhao", b =>
-                {
-                    b.HasOne("CaneOrbis.Api.Models.Propriedade", "Propriedade")
-                        .WithMany("Talhoes")
-                        .HasForeignKey("IdPropriedade")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Propriedade");
-                });
-
             modelBuilder.Entity("CaneOrbis.Api.Models.DispositivoIot", b =>
                 {
                     b.Navigation("DadosSatelite");
@@ -343,14 +338,14 @@ namespace CaneOrbis.Api.Migrations
                     b.Navigation("LeiturasSensor");
                 });
 
-            modelBuilder.Entity("CaneOrbis.Api.Models.Propriedade", b =>
-                {
-                    b.Navigation("Talhoes");
-                });
-
-            modelBuilder.Entity("CaneOrbis.Api.Models.Talhao", b =>
+            modelBuilder.Entity("CaneOrbis.Api.Models.Field", b =>
                 {
                     b.Navigation("DispositivosIot");
+                });
+
+            modelBuilder.Entity("CaneOrbis.Api.Models.Propriedade", b =>
+                {
+                    b.Navigation("Fields");
                 });
 
             modelBuilder.Entity("CaneOrbis.Api.Models.Usuario", b =>

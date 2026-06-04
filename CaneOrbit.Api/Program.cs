@@ -1,15 +1,22 @@
 using CaneOrbis.Api.Data;
+using CaneOrbis.Api.Models;
+using CaneOrbis.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+builder.Services.Configure<EosSettings>(
+    builder.Configuration.GetSection("Eos"));
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseOracle(
         builder.Configuration.GetConnectionString("OracleConnection")
     )
 );
+
+builder.Services.AddScoped<EosService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

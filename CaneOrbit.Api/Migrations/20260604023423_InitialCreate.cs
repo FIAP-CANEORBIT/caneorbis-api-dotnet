@@ -50,22 +50,22 @@ namespace CaneOrbis.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "T_ORB_TALHAO",
+                name: "T_ORB_FIELD",
                 columns: table => new
                 {
-                    ID_TALHAO = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                    ID_FIELD = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     ID_PROPRIEDADE = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    NM_TALHAO = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
+                    ID_EOS_FIELD = table.Column<int>(type: "NUMBER(10)", nullable: true),
+                    NM_FIELD = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
                     VL_AREA_HECTARE = table.Column<decimal>(type: "NUMBER(10,2)", nullable: true),
-                    DS_TIPO_SOLO = table.Column<string>(type: "NVARCHAR2(80)", maxLength: 80, nullable: true),
-                    DS_CULTURA = table.Column<string>(type: "NVARCHAR2(80)", maxLength: 80, nullable: false, defaultValue: "CANA_DE_ACUCAR")
+                    DT_CRIACAO = table.Column<DateTime>(type: "TIMESTAMP", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_T_ORB_TALHAO", x => x.ID_TALHAO);
+                    table.PrimaryKey("PK_T_ORB_FIELD", x => x.ID_FIELD);
                     table.ForeignKey(
-                        name: "FK_T_ORB_TALHAO_T_ORB_PROPRIEDADE_ID_PROPRIEDADE",
+                        name: "FK_T_ORB_FIELD_T_ORB_PROPRIEDADE_ID_PROPRIEDADE",
                         column: x => x.ID_PROPRIEDADE,
                         principalTable: "T_ORB_PROPRIEDADE",
                         principalColumn: "ID_PROPRIEDADE",
@@ -78,7 +78,7 @@ namespace CaneOrbis.Api.Migrations
                 {
                     ID_DISPOSITIVO = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    ID_TALHAO = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    ID_FIELD = table.Column<int>(type: "NUMBER(10)", nullable: true),
                     DS_MAC_ADDRESS = table.Column<string>(type: "NVARCHAR2(17)", maxLength: 17, nullable: false),
                     NM_APELIDO = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
                     VL_LATITUDE = table.Column<decimal>(type: "NUMBER(10,8)", nullable: true),
@@ -90,11 +90,10 @@ namespace CaneOrbis.Api.Migrations
                 {
                     table.PrimaryKey("PK_T_ORB_DISPOSITIVO_IOT", x => x.ID_DISPOSITIVO);
                     table.ForeignKey(
-                        name: "FK_T_ORB_DISPOSITIVO_IOT_T_ORB_TALHAO_ID_TALHAO",
-                        column: x => x.ID_TALHAO,
-                        principalTable: "T_ORB_TALHAO",
-                        principalColumn: "ID_TALHAO",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_T_ORB_DISPOSITIVO_IOT_T_ORB_FIELD_ID_FIELD",
+                        column: x => x.ID_FIELD,
+                        principalTable: "T_ORB_FIELD",
+                        principalColumn: "ID_FIELD");
                 });
 
             migrationBuilder.CreateTable(
@@ -156,9 +155,14 @@ namespace CaneOrbis.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_ORB_DISPOSITIVO_IOT_ID_TALHAO",
+                name: "IX_T_ORB_DISPOSITIVO_IOT_ID_FIELD",
                 table: "T_ORB_DISPOSITIVO_IOT",
-                column: "ID_TALHAO");
+                column: "ID_FIELD");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_ORB_FIELD_ID_PROPRIEDADE",
+                table: "T_ORB_FIELD",
+                column: "ID_PROPRIEDADE");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_ORB_LEITURA_SENSOR_ID_DISPOSITIVO",
@@ -169,11 +173,6 @@ namespace CaneOrbis.Api.Migrations
                 name: "IX_T_ORB_PROPRIEDADE_ID_USUARIO",
                 table: "T_ORB_PROPRIEDADE",
                 column: "ID_USUARIO");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_ORB_TALHAO_ID_PROPRIEDADE",
-                table: "T_ORB_TALHAO",
-                column: "ID_PROPRIEDADE");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_ORB_USUARIO_DS_EMAIL",
@@ -195,7 +194,7 @@ namespace CaneOrbis.Api.Migrations
                 name: "T_ORB_DISPOSITIVO_IOT");
 
             migrationBuilder.DropTable(
-                name: "T_ORB_TALHAO");
+                name: "T_ORB_FIELD");
 
             migrationBuilder.DropTable(
                 name: "T_ORB_PROPRIEDADE");
