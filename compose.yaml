@@ -1,0 +1,64 @@
+﻿services:
+  db:
+    container_name: caneorbit-oracle-db
+    image: gvenzl/oracle-xe:latest
+    restart: always
+    environment:
+      - ORACLE_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "1521:1521"
+    networks:
+      - caneorbit_network
+    volumes:
+      - db_data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s SYSTEM/${DB_PASSWORD}@//localhost:1521/XE"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  app-csharp:
+    container_name: caneorbit-csharp-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      ConnectionStrings__OracleConnection: "User Id=SYSTEM;Password=${DB_PASSWORD};Data Source=db:1521/XE;"
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - caneorbit_network
+
+  app-java:
+    container_name: caneorbit-api
+    restart: always
+    build: ./caneorbit-api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@db:1521/XE
+      SPRING_DATASOURCE_USERNAME: SYSTEM
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      API_SECURITY_TOKEN_SECRET: ${JWT_SECRET}
+      API_SECURITY_TOKEN_ISSUER: caneorbit-api
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - caneorbit_network
+
+networks:
+  caneorbit_network:
+    driver: bridge
+
+volumes:
+  db_data:

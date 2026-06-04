@@ -1,0 +1,20 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  app-csharp:
+    build:
+      context: "/home/diandrade/Desktop/caneorbis-api-dotnet"
+      dockerfile: "Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/CaneOrbis.Api.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "caneorbis.api:dev"
+    ports: []
+    volumes:
+    - "/home/diandrade/Desktop/caneorbis-api-dotnet/CaneOrbit.Api:/app:rw"
+    - "/home/diandrade/Desktop/caneorbis-api-dotnet:/src:rw"
+    - "/home/diandrade/.nuget/packages:/root/.nuget/packages"
+    working_dir: "/app"
