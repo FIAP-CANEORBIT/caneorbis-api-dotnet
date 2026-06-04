@@ -37,10 +37,10 @@ namespace CaneOrbis.Api.Controllers
             if (dispositivo.VlLatitude == null || dispositivo.VlLongitude == null)
                 return BadRequest("Dispositivo não possui latitude e longitude cadastradas.");
 
-            var propriedadeExiste = await _context.Propriedades
-                .AnyAsync(p => p.IdPropriedade == dto.IdPropriedade);
+            var propriedade = await _context.Propriedades
+    .FirstOrDefaultAsync(p => p.IdPropriedade == dto.IdPropriedade);
 
-            if (!propriedadeExiste)
+            if (propriedade == null)
                 return BadRequest("Propriedade informada não existe.");
 
             var respostaEos = await _eosService.CriarFieldAsync(
