@@ -14,6 +14,6 @@
 
         public Usuario? Usuario { get; set; }
 
-        public ICollection<Talhao> Talhoes { get; set; } = new List<Talhao>();
+        public ICollection<Field> Fields { get; set; } = new List<Field>();
     }
 }

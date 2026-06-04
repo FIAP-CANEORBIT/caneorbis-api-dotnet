@@ -4,7 +4,7 @@
     {
         public int IdDispositivo { get; set; }
 
-        public int IdTalhao { get; set; }
+        public int? IdField { get; set; }
 
         public string DsMacAddress { get; set; } = string.Empty;
 
@@ -18,7 +18,7 @@
 
         public DateTime DtInstalacao { get; set; } = DateTime.Now;
 
-        public Talhao? Talhao { get; set; }
+        public Field? Field { get; set; }
 
         public ICollection<LeituraSensor> LeiturasSensor { get; set; } = new List<LeituraSensor>();
 
