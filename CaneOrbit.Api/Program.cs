@@ -15,10 +15,14 @@ builder.Services.Configure<EosSettings>(
 builder.Services.Configure<GeminiSettings>(
     builder.Configuration.GetSection("Gemini"));
 
+var connectionString = builder.Configuration.GetConnectionString("OracleConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__OracleConnection");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseOracle(
-        builder.Configuration.GetConnectionString("OracleConnection")
-    )
+    options.UseOracle(connectionString)
 );
 
 builder.Services.AddScoped<EosService>();
@@ -32,11 +36,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
