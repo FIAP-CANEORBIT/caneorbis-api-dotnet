@@ -12,7 +12,7 @@ Antes de começar, você precisa ter instalado:
 ### Passo 1: Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/caneorbit-backend-java-csharp.git
+git clone https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet.git
 cd caneorbit-backend-java-csharp
 ```
 
@@ -48,10 +48,10 @@ Você deve ver 3 containers rodando:
 
 Abra no navegador:
 
-| API | URL |
-|-----|-----|
-| **Swagger C#** | http://localhost:5000/swagger |
-| **Swagger Java** | http://localhost:8080/swagger-ui.html |
+| API | URL (Local) | URL (Produção - Render) |
+|-----|-------------|------------------------|
+| **Swagger C#** | http://localhost:5000/swagger | https://caneorbis-api-dotnet.onrender.com/swagger |
+| **Swagger Java** | http://localhost:8080/swagger-ui.html | https://caneorbis-api-java.onrender.com/swagger-ui/index.html |
 
 ---
 
@@ -139,6 +139,43 @@ curl -X GET "http://localhost:8080/api/leituras/dispositivo/1"
 
 ---
 
+## Testar as Requisições no Render
+
+### 1. Cadastrar usuário (Produção)
+
+```bash
+curl -X POST https://caneorbis-api-java.onrender.com/api/usuarios/register \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"Joao Silva","email":"joao@email.com","senha":"123456"}'
+```
+
+### 2. Login (Produção)
+
+```bash
+curl -X POST https://caneorbis-api-java.onrender.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"joao@email.com","senha":"123456"}'
+```
+
+### 3. Criar propriedade (Produção)
+
+```bash
+TOKEN="seu_token_aqui"
+
+curl -X POST https://caneorbis-api-java.onrender.com/api/propriedades \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"nome":"Fazenda Boa Vista","localizacao":"SP","areaHectare":150.5}'
+```
+
+### 4. Listar leituras (Produção - C#)
+
+```bash
+curl -X GET https://caneorbis-api-dotnet.onrender.com/api/LeituraSensor
+```
+
+---
+
 ## Comandos úteis
 
 ### Parar os containers
@@ -211,12 +248,31 @@ docker compose up -d
 
 Faça login novamente para gerar um novo token.
 
+### Erro 503 no Render
+
+Aguarde alguns minutos ou verifique os logs no dashboard do Render.
+
+### Erro 403 no Swagger Java
+
+Verifique se o `SecurityConfig` permite acesso aos endpoints do Swagger:
+
+```java
+.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+```
+
 ---
 
 ## Suporte
+
+### Local
 
 - **Swagger C#:** http://localhost:5000/swagger
 - **Swagger Java:** http://localhost:8080/swagger-ui.html
 - **Banco de dados:** localhost:1521 (usuário SYSTEM, senha oracle123)
 
-**Pronto! Sua API está funcionando.** 🚀
+### Produção (Render)
+
+- **Swagger C#:** https://caneorbis-api-dotnet.onrender.com/swagger
+- **Swagger Java:** https://caneorbis-api-java.onrender.com/swagger-ui/index.html
+- **API C# Base:** https://caneorbis-api-dotnet.onrender.com
+- **API Java Base:** https://caneorbis-api-java.onrender.com
