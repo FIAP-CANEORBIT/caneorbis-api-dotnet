@@ -1,6 +1,6 @@
 ﻿services:
   db:
-    container_name: caneorbit-oracle-db
+    container_name: caneorbit-oracle-db-rm566385
     image: gvenzl/oracle-xe:latest
     restart: always
     environment:
@@ -19,7 +19,7 @@
       start_period: 60s
 
   app-csharp:
-    container_name: caneorbit-csharp-api
+    container_name: caneorbit-csharp-api-rm566385
     build:
       context: .
       dockerfile: Dockerfile
@@ -29,6 +29,8 @@
       - "5001:8081"
     environment:
       ConnectionStrings__OracleConnection: "User Id=SYSTEM;Password=${DB_PASSWORD};Data Source=db:1521/XE;"
+      Eos__ApiKey: "apk.3da89033f5979d26f592507b2146257720df3c09d3ec1b1e718f46d4899b765e"
+      Eos__BaseUrl: "https://api-connect.eos.com"
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
     depends_on:
@@ -38,9 +40,11 @@
       - caneorbit_network
 
   app-java:
-    container_name: caneorbit-api
+    container_name: caneorbit-java-api-rm566385
+    build:
+      context: ./caneorbitJava
+      dockerfile: Dockerfile
     restart: always
-    build: ./caneorbit-api
     ports:
       - "8080:8080"
     environment:

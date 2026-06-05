@@ -16,6 +16,7 @@ namespace CaneOrbis.Api.Services
         {
             _settings = settings.Value;
             _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri(_settings.BaseUrl);
         }
 
         public async Task<EosFieldResponseDto> CriarFieldAsync(
