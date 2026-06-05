@@ -1,17 +1,16 @@
 services:
   - type: web
     name: caneorbit-db
-    runtime: image
+    runtime: docker
     repo: https://github.com/seu-usuario/caneorbit-backend-java-csharp
     dockerfilePath: ./Dockerfile.db
     envVars:
       - key: ORACLE_PASSWORD
         value: oracle123
-    healthCheckPath: /health
 
   - type: web
     name: caneorbit-api-csharp
-    runtime: image
+    runtime: docker
     repo: https://github.com/seu-usuario/caneorbit-backend-java-csharp
     dockerfilePath: ./Dockerfile
     envVars:
@@ -19,11 +18,10 @@ services:
         value: User Id=SYSTEM;Password=oracle123;Data Source=caneorbit-db:1521/XE
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
-    healthCheckPath: /health
 
   - type: web
     name: caneorbit-api-java
-    runtime: image
+    runtime: docker
     repo: https://github.com/seu-usuario/caneorbit-backend-java-csharp
     dockerfilePath: ./caneorbitJava/Dockerfile
     envVars:
@@ -35,4 +33,3 @@ services:
         value: oracle123
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
         value: validate
-    healthCheckPath: /actuator/health
