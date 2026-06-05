@@ -1,6 +1,8 @@
 using CaneOrbis.Api.Data;
 using CaneOrbis.Api.Models;
 using CaneOrbis.Api.Services;
+using CaneOrbit.Api.Models;
+using CaneOrbit.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,9 @@ builder.Services.AddControllers();
 builder.Services.Configure<EosSettings>(
     builder.Configuration.GetSection("Eos"));
 
+builder.Services.Configure<GeminiSettings>(
+    builder.Configuration.GetSection("Gemini"));
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseOracle(
         builder.Configuration.GetConnectionString("OracleConnection")
@@ -17,6 +22,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 builder.Services.AddScoped<EosService>();
+
+builder.Services.AddHttpClient<GeminiService>();
+
+builder.Services.AddScoped<AnaliseAgricolaService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
