@@ -1,35 +1,59 @@
+# render.yaml
 services:
   - type: web
-    name: caneorbit-db
+    name: caneorbit-api-csharp-prod
     runtime: docker
-    repo: https://github.com/seu-usuario/caneorbit-backend-java-csharp
-    dockerfilePath: ./Dockerfile.db
-    envVars:
-      - key: ORACLE_PASSWORD
-        value: oracle123
-
-  - type: web
-    name: caneorbit-api-csharp
-    runtime: docker
-    repo: https://github.com/seu-usuario/caneorbit-backend-java-csharp
+    repo: https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet
     dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
-      - key: ConnectionStrings__OracleConnection
-        value: User Id=SYSTEM;Password=oracle123;Data Source=caneorbit-db:1521/XE
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+      - key: DB_HOST
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: password
 
   - type: web
-    name: caneorbit-api-java
+    name: caneorbit-api-java-prod
     runtime: docker
-    repo: https://github.com/seu-usuario/caneorbit-backend-java-csharp
+    repo: https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet
     dockerfilePath: ./caneorbitJava/Dockerfile
+    dockerContext: ./caneorbitJava
     envVars:
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:oracle:thin:@caneorbit-db:1521/XE
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: url
       - key: SPRING_DATASOURCE_USERNAME
-        value: SYSTEM
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: user
       - key: SPRING_DATASOURCE_PASSWORD
-        value: oracle123
+        fromDatabase:
+          name: caneorbit-db-prod
+          property: password
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
-        value: validate
+        value: update
+
+databases:
+  - name: caneorbit-db-prod
+    plan: free
+    databaseName: caneorbit_db
+    user: caneorbit_user
