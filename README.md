@@ -1,6 +1,3 @@
-Aqui está o README final, unificando as duas APIs (Java e C#) com foco no que foi construído em Java, incluindo os links públicos e removendo o checklist:
-
-```markdown
 # CaneOrbit — Economia Espacial Aplicada à Agricultura
 
 > API REST de monitoramento agrícola de precisão para cultivo de cana-de-açúcar, integrando sensores IoT (ESP32), imagens de satélite (EOS) e análise com IA (Gemini).
@@ -558,4 +555,3 @@ docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:
 > **Repositório Java:** https://github.com/FIAP-CANEORBIT/fiap-2tdspo-caneorbit-java
 > 
 > **Swagger Java (Produção):** https://caneorbis-api-java.onrender.com/swagger-ui/index.html
-```
