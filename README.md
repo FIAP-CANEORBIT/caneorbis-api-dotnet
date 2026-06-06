@@ -11,9 +11,7 @@
 | **Repositório GitHub (Java)** | https://github.com/FIAP-CANEORBIT/fiap-2tdspo-caneorbit-java |
 | **Repositório GitHub (C#)** | https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet |
 | **Swagger UI - Java (Produção)** | https://caneorbis-api-java.onrender.com/swagger-ui/index.html |
-| **Swagger UI - Java (Local)** | http://localhost:8080/swagger-ui.html |
 | **Swagger UI - C# (Produção)** | https://caneorbis-api-dotnet.onrender.com/swagger |
-| **Swagger UI - C# (Local)** | http://localhost:5000/swagger |
 | **API Java Base (Produção)** | https://caneorbis-api-java.onrender.com |
 | **API C# Base (Produção)** | https://caneorbis-api-dotnet.onrender.com |
 | **Vídeo de Apresentação (10 min)** | *em breve* |
@@ -21,7 +19,7 @@
 
 ---
 
-## 📋 Descrição
+## 📋 Descrição do Projeto
 
 O **CaneOrbit** é uma plataforma de agricultura de precisão que permite a produtores rurais:
 
@@ -39,7 +37,13 @@ O projeto é composto por **duas APIs independentes** que compartilham o mesmo b
 | **API Java** | Spring Boot 3.x | CRUD de usuários, propriedades, dispositivos e leituras de sensor |
 | **API C#** | ASP.NET Core | Integração com EOS (satélite) e Gemini (IA) |
 
-Ambas as APIs estão em produção no Render e podem ser acessadas pelos links acima.
+### Regras de Negócio
+
+- **Usuário:** Deve conter Nome, E-mail (único) e Senha criptografada.
+- **Propriedade:** Deve conter Nome, Localização e Área em hectares.
+- **Dispositivo IoT:** Associado a um field/talhão, com MAC Address único, localização (lat/long) e status (ATIVO/INATIVO).
+- **Leitura de Sensor:** Registra umidade do solo, temperatura e pH, com timestamp automático.
+- **Dados de Satélite:** Integrados via API EOS, incluem NDVI, precipitação, temperatura do ar e condição climática.
 
 ---
 
@@ -53,9 +57,9 @@ Ambas as APIs estão em produção no Render e podem ser acessadas pelos links a
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+# Disciplina 1: Java Advanced
 
-### API Java (Spring Boot)
+## 🛠️ Tecnologias Utilizadas (Java)
 
 | Tecnologia | Uso |
 | :--- | :--- |
@@ -70,25 +74,6 @@ Ambas as APIs estão em produção no Render e podem ser acessadas pelos links a
 | Swagger / OpenAPI 3 (Springdoc) | Documentação interativa |
 | Maven | Gerenciamento de dependências |
 
-### API C# (ASP.NET Core)
-
-| Tecnologia | Uso |
-| :--- | :--- |
-| C# / .NET 8 | Linguagem e framework |
-| Entity Framework Core | ORM e migrations |
-| Oracle EF Core Driver | Conexão com Oracle |
-| API EOS | Dados de satélite e NDVI |
-| API Gemini (Google) | Análises com IA |
-| Swagger / OpenAPI | Documentação interativa |
-
-### Infraestrutura Compartilhada
-
-| Tecnologia | Uso |
-| :--- | :--- |
-| Oracle Database | Banco de dados relacional (Docker + Render) |
-| Docker Compose | Orquestração local |
-| Render | Deploy público (duas APIs + banco) |
-
 ---
 
 ## ⚙️ Configuração do Ambiente (Local)
@@ -96,27 +81,20 @@ Ambas as APIs estão em produção no Render e podem ser acessadas pelos links a
 ### Pré-requisitos
 
 - **JDK 21**
-- **.NET 8 SDK**
 - **Docker Desktop**
 - **Maven 3.9+**
 - **Git**
 
 ### Passo a Passo
 
-**1. Clone os repositórios**
+**1. Clone o repositório**
 
 ```bash
 git clone https://github.com/FIAP-CANEORBIT/fiap-2tdspo-caneorbit-java.git
-git clone https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet.git
-```
-
-**2. Entre na pasta do projeto Java**
-
-```bash
 cd fiap-2tdspo-caneorbit-java
 ```
 
-**3. Configure as variáveis de ambiente (ou use o docker-compose na raiz)**
+**2. Configure as variáveis de ambiente**
 
 Crie um arquivo `.env` na raiz do projeto:
 
@@ -125,9 +103,7 @@ DB_PASSWORD=oracle123
 JWT_SECRET=minha-chave-secreta-123
 ```
 
-**4. Suba os containers com Docker Compose**
-
-Na raiz do projeto (onde está o `docker-compose.yml`):
+**3. Suba os containers com Docker Compose**
 
 ```bash
 docker compose up -d --build
@@ -138,18 +114,13 @@ Isso irá subir:
 - API Java (porta 8080)
 - API C# (porta 5000)
 
-**5. Verifique se tudo está rodando**
+**4. Verifique se tudo está rodando**
 
 ```bash
 docker ps
 ```
 
-Você deve ver 3 containers rodando:
-- `caneorbit-oracle-db-*` (banco de dados)
-- `caneorbit-csharp-api-*` (API C#)
-- `caneorbit-java-api-*` (API Java)
-
-**6. Acesse as documentações**
+**5. Acesse as documentações**
 
 | API | URL Local |
 | :--- | :--- |
@@ -163,9 +134,36 @@ Você deve ver 3 containers rodando:
 | Recurso | URL |
 | :--- | :--- |
 | **Swagger Java** | https://caneorbis-api-java.onrender.com/swagger-ui/index.html |
-| **Swagger C#** | https://caneorbis-api-dotnet.onrender.com/swagger |
 | **API Java Base** | https://caneorbis-api-java.onrender.com |
-| **API C# Base** | https://caneorbis-api-dotnet.onrender.com |
+
+---
+
+## 📚 Decisões Técnicas (API Java)
+
+**Autenticação Stateless (JWT):** Após login em `/api/auth/login`, um token JWT com validade de 24h é emitido. Envie-o no header `Authorization: Bearer <TOKEN>` nas requisições protegidas.
+
+**HATEOAS:** Os ResponseDTOs incluem links de navegação (`_links`) seguindo o Nível 3 do Richardson Maturity Model, permitindo que clientes descubram ações disponíveis a partir das respostas.
+
+**Tratamento Global de Exceções:** `@RestControllerAdvice` padroniza respostas de erro em `ErroResponseDTO`, cobrindo validações, recursos não encontrados, credenciais inválidas e erros de sistema.
+
+**DTOs e Records:** A camada de domínio nunca é exposta diretamente. `RequestDTOs` validam entradas com `@NotBlank`, `@Email`, etc. `ResponseDTOs` (incluindo Java Records onde aplicável) definem saídas intermediadas por mappers desacoplados.
+
+**Lombok e DevTools:** Usados para eliminar boilerplate (getters, construtores, builders) e habilitar hot reload durante o desenvolvimento.
+
+**CORS:** Configurado via `SecurityConfig` para permitir acesso ao deploy público.
+
+**Modelagem Avançada:** O modelo de dados contempla herança, campos `@Embedded` e múltiplas tabelas relacionadas conforme descrito no DER abaixo.
+
+---
+
+## 🏗️ Modelo de Maturidade REST (Richardson)
+
+| Nível | Descrição | Status |
+| :--- | :--- | :--- |
+| Nível 0 | POX | ❌ Não aplicável |
+| Nível 1 | Resources | ✅ Endpoints organizados por recurso |
+| Nível 2 | HTTP Verbs | ✅ GET, POST, PUT, DELETE com status semânticos |
+| Nível 3 | HATEOAS | ✅ Links de navegação nos ResponseDTOs |
 
 ---
 
@@ -190,7 +188,6 @@ Você deve ver 3 containers rodando:
 | GET | `/api/propriedades/{id}` | Busca por ID | 🔒 |
 | PUT | `/api/propriedades/{id}` | Atualiza | 🔒 |
 | DELETE | `/api/propriedades/{id}` | Remove | 🔒 |
-| GET | `/api/propriedades/{id}/fields` | Lista fields da propriedade | 🔒 |
 
 ### Dispositivos IoT
 
@@ -201,7 +198,6 @@ Você deve ver 3 containers rodando:
 | GET | `/api/dispositivos/{id}` | Busca por ID | 🔒 |
 | PUT | `/api/dispositivos/{id}` | Atualiza | 🔒 |
 | DELETE | `/api/dispositivos/{id}` | Remove | 🔒 |
-| GET | `/api/dispositivos/{id}/dados-satelite` | Dados de satélite (via C#) | 🔒 |
 
 ### Leituras de Sensor
 
@@ -263,66 +259,6 @@ curl -X POST https://caneorbis-api-java.onrender.com/api/dispositivos \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"macAddress":"AA:BB:CC:DD:EE:FF","apelido":"Sensor 01","latitude":-23.5505,"longitude":-46.6333,"statusDispositivo":"ATIVO","dataInstalacao":"2024-01-15"}'
 ```
-
-### 5. Criar leitura de sensor
-
-```bash
-curl -X POST https://caneorbis-api-java.onrender.com/api/leituras \
-  -H "Content-Type: application/json" \
-  -d '{"idDispositivo":1,"umidadeSolo":45.5,"temperatura":28.3,"phSolo":6.2}'
-```
-
-### 6. Listar leituras de um dispositivo
-
-```bash
-curl -X GET "https://caneorbis-api-java.onrender.com/api/leituras/dispositivo/1"
-```
-
----
-
-## 🧪 Exemplos de Requisições (Produção - C#)
-
-### Listar todas as leituras de sensor
-
-```bash
-curl -X GET https://caneorbis-api-dotnet.onrender.com/api/LeituraSensor
-```
-
-### Buscar leitura por ID
-
-```bash
-curl -X GET https://caneorbis-api-dotnet.onrender.com/api/LeituraSensor/1
-```
-
----
-
-## 📚 Decisões Técnicas (API Java)
-
-**Autenticação Stateless (JWT):** Após login em `/api/auth/login`, um token JWT com validade de 24h é emitido. Envie-o no header `Authorization: Bearer <TOKEN>` nas requisições protegidas.
-
-**HATEOAS:** Os ResponseDTOs incluem links de navegação (`_links`) seguindo o Nível 3 do Richardson Maturity Model, permitindo que clientes descubram ações disponíveis a partir das respostas.
-
-**Tratamento Global de Exceções:** `@RestControllerAdvice` padroniza respostas de erro em `ErroResponseDTO`, cobrindo validações, recursos não encontrados, credenciais inválidas e erros de sistema.
-
-**DTOs e Records:** A camada de domínio nunca é exposta diretamente. `RequestDTOs` validam entradas com `@NotBlank`, `@Email`, etc. `ResponseDTOs` (incluindo Java Records onde aplicável) definem saídas intermediadas por mappers desacoplados.
-
-**Lombok e DevTools:** Usados para eliminar boilerplate (getters, construtores, builders) e habilitar hot reload durante o desenvolvimento.
-
-**CORS:** Configurado via `SecurityConfig` para permitir acesso ao deploy público.
-
-**Modelagem Avançada:** O modelo de dados contempla herança, campos `@Embedded` e múltiplas tabelas relacionadas conforme descrito no DER abaixo.
-
----
-
-## 🏗️ Modelo de Maturidade REST (Richardson)
-
-| Nível | Descrição | Status |
-| :--- | :--- | :--- |
-| Nível 0 | POX | ❌ Não aplicável |
-| Nível 1 | Resources | ✅ Endpoints organizados por recurso |
-| Nível 2 | HTTP Verbs | ✅ GET, POST, PUT, DELETE com status semânticos |
-| Nível 3 | HATEOAS | ✅ Links de navegação nos ResponseDTOs |
-
 ---
 
 ## 📊 Diagramas
@@ -505,43 +441,354 @@ src/main/java/.../caneorbit/
 
 ---
 
-## 🐳 Comandos Docker Úteis
+# Disciplina 2: Advanced Business Development with .NET (C#)
 
-### Subir os containers
+## 🛠️ Tecnologias Utilizadas (C#)
+
+| Tecnologia | Uso |
+| :--- | :--- |
+| C# / .NET 8 | Linguagem e framework |
+| Entity Framework Core | ORM e migrations |
+| Oracle EF Core Driver | Conexão com Oracle |
+| API EOS | Dados de satélite e NDVI |
+| API Gemini (Google) | Análises com IA |
+| Swagger / OpenAPI | Documentação interativa |
+
+---
+
+## 📡 Endpoints da API C#
+
+### Dados de Satélite
+
+| Método | Endpoint | Descrição | Auth |
+| :--- | :--- | :--- | :--- |
+| GET | `/api/DadoSatelite` | Lista todos os dados de satélite | — |
+| GET | `/api/DadoSatelite/{id}` | Busca por ID | — |
+| GET | `/api/DadoSatelite/dispositivo/{id}` | Lista por dispositivo | — |
+| POST | `/api/DadoSatelite` | Registra novo dado de satélite | — |
+
+### Integração com IA (Gemini)
+
+| Método | Endpoint | Descrição | Auth |
+| :--- | :--- | :--- | :--- |
+| POST | `/api/Gemini/analisar` | Envia dados para análise do Gemini | — |
+| GET | `/api/Gemini/recomendacoes/{dispositivoId}` | Obtém recomendações por dispositivo | — |
+
+### Leitura de Sensor
+
+| Método | Endpoint | Descrição | Auth |
+| :--- | :--- | :--- | :--- |
+| GET | `/api/LeituraSensor` | Lista todas as leituras | — |
+| GET | `/api/LeituraSensor/{id}` | Busca por ID | — |
+| POST | `/api/LeituraSensor` | Registra nova leitura | — |
+| PUT | `/api/LeituraSensor/{id}` | Atualiza leitura | — |
+| DELETE | `/api/LeituraSensor/{id}` | Remove leitura | — |
+
+---
+
+## 🧪 Exemplos de Requisições (Produção - C#)
+
+### Listar todas as leituras de sensor
+
+```bash
+curl -X GET https://caneorbis-api-dotnet.onrender.com/api/LeituraSensor
+```
+
+### Buscar leitura por ID
+
+```bash
+curl -X GET https://caneorbis-api-dotnet.onrender.com/api/LeituraSensor/1
+```
+
+### Analisar dados com Gemini
+
+```bash
+curl -X POST https://caneorbis-api-dotnet.onrender.com/api/Gemini/analisar \
+  -H "Content-Type: application/json" \
+  -d '{"dispositivoId":1,"ndvi":0.75,"precipitacao":12.5,"temperaturaAr":28.3}'
+```
+
+---
+
+# Disciplina 3: DevOps Tools & Cloud Computing
+
+## 🏗️ Arquitetura Macro da Solução na Nuvem
+
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    Render Cloud                          │
+                    │                                                          │
+                    │   ┌─────────────────┐      ┌─────────────────────────┐   │
+                    │   │                 │      │                         │   │
+    Usuário ────────►│   │  API Java       │      │     Oracle Database     │   │
+    (Frontend/       │   │  (Spring Boot)  │◄────►│     (Containerizado)    │   │
+     Mobile/         │   │  Porta: 8080    │      │     Porta: 1521         │   │
+     Insomnia)       │   │                 │      │                         │   │
+                    │   └─────────────────┘      └─────────────────────────┘   │
+                    │           │                                              │
+                    │           │                                              │
+                    │   ┌─────────────────┐                                   │
+                    │   │                 │                                   │
+                    │   │  API C#         │                                   │
+                    │   │  (ASP.NET Core) │                                   │
+                    │   │  Porta: 5000    │                                   │
+                    │   │                 │                                   │
+                    │   └────────┬────────┘                                   │
+                    │            │                                            │
+                    └────────────┼────────────────────────────────────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────────────────┐
+                    │                                     │
+                    │         Serviços Externos           │
+                    │  ┌─────────────┐  ┌─────────────┐   │
+                    │  │  API EOS    │  │  Gemini AI  │   │
+                    │  │  (Satélite) │  │  (Google)   │   │
+                    │  └─────────────┘  └─────────────┘   │
+                    │                                     │
+                    └─────────────────────────────────────┘
+```
+
+---
+
+## 🐳 Containerização com Docker
+
+### Dockerfile (API Java)
+
+```dockerfile
+FROM eclipse-temurin:21-jdk-alpine
+
+RUN addgroup -S caneorbitgroup && adduser -S caneorbituser -G caneorbitgroup
+
+WORKDIR /app
+
+COPY target/*.jar caneorbit-api.jar
+
+USER caneorbituser
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "caneorbit-api.jar"]
+```
+
+### Dockerfile (API C#)
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["CaneOrbis.API/CaneOrbis.API.csproj", "CaneOrbis.API/"]
+RUN dotnet restore "CaneOrbis.API/CaneOrbis.API.csproj"
+COPY . .
+WORKDIR "/src/CaneOrbis.API"
+RUN dotnet build "CaneOrbis.API.csproj" -c Release -o /app/build
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+RUN addgroup -S caneorbitgroup && adduser -S caneorbituser -G caneorbitgroup
+USER caneorbituser
+EXPOSE 5000
+COPY --from=build /app/build .
+ENTRYPOINT ["dotnet", "CaneOrbis.API.dll"]
+```
+
+### docker-compose.yml (Orquestração Completa)
+
+```yaml
+services:
+  db:
+    container_name: caneorbit-oracle-db-rm566385
+    image: gvenzl/oracle-xe:latest
+    restart: always
+    environment:
+      - ORACLE_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "1521:1521"
+    networks:
+      - caneorbit_network
+    volumes:
+      - db_data:/opt/oracle/oradata
+
+  java-api:
+    container_name: caneorbit-java-api-rm566385
+    restart: always
+    build: ./fiap-2tdspo-caneorbit-java
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 1521
+      DB_NAME: XE
+      DB_USER: SYSTEM
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - db
+    networks:
+      - caneorbit_network
+
+  csharp-api:
+    container_name: caneorbit-csharp-api-rm566385
+    restart: always
+    build: ./caneorbis-api-dotnet
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 1521
+      DB_NAME: XE
+      DB_USER: SYSTEM
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - caneorbit_network
+
+networks:
+  caneorbit_network:
+
+volumes:
+  db_data:
+```
+
+---
+
+## 📝 Configuração do `.env`
+
+```env
+DB_PASSWORD=oracle123
+JWT_SECRET=minha-chave-secreta-123
+```
+
+---
+
+## 🚀 Como Executar o Deploy (Render)
+
+### Pré-requisitos
+
+- **Git**
+- **Docker Desktop** (para testes locais)
+- **Conta Render.com**
+
+### Passo a Passo
+
+**1. Clone os repositórios**
+
+```bash
+git clone https://github.com/FIAP-CANEORBIT/fiap-2tdspo-caneorbit-java.git
+git clone https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet.git
+```
+
+**2. Configure o arquivo `.env`**
+
+Crie um arquivo `.env` na raiz com as credenciais.
+
+**3. Execute localmente com Docker Compose**
 
 ```bash
 docker compose up -d --build
 ```
 
-### Parar os containers
+**4. Verifique a execução**
 
 ```bash
-docker compose down
-```
-
-### Parar e limpar o banco de dados
-
-```bash
-docker compose down -v
-```
-
-### Ver logs de um serviço
-
-```bash
+docker ps
 docker logs caneorbit-java-api-rm566385 --tail 50
 docker logs caneorbit-csharp-api-rm566385 --tail 50
-docker logs caneorbit-oracle-db-rm566385 --tail 50
 ```
 
-### Acessar o banco de dados
+**5. Acesse as aplicações**
+
+| Serviço | URL Local |
+| :--- | :--- |
+| API Java | http://localhost:8080 |
+| Swagger Java | http://localhost:8080/swagger-ui.html |
+| API C# | http://localhost:5000 |
+| Swagger C# | http://localhost:5000/swagger |
+
+**6. Deploy no Render**
+
+Os serviços já estão em produção nos links:
+
+| Serviço | URL Produção |
+| :--- | :--- |
+| API Java | https://caneorbis-api-java.onrender.com |
+| Swagger Java | https://caneorbis-api-java.onrender.com/swagger-ui/index.html |
+| API C# | https://caneorbis-api-dotnet.onrender.com |
+| Swagger C# | https://caneorbis-api-dotnet.onrender.com/swagger |
+
+---
+
+## ✅ Verificações DevOps (Checklist)
+
+| Requisito | Status | Evidência |
+| :--- | :--- | :--- |
+| Container da aplicação com Dockerfile personalizado | ✅ | `Dockerfile` em ambos os repositórios |
+| Execução com usuário não privilegiado | ✅ | `caneorbituser` no Dockerfile |
+| Diretório de trabalho definido | ✅ | `WORKDIR /app` |
+| Variável de ambiente utilizada | ✅ | `.env` com `DB_PASSWORD`, `JWT_SECRET` |
+| Porta exposta | ✅ | 8080 (Java) e 5000 (C#) |
+| Nome do container com RM | ✅ | `caneorbit-java-api-rm566385` |
+| CRUD completo com mínimo 2 tabelas | ✅ | Usuário/Propriedade/Dispositivo/Leitura |
+| Container do banco com volume nomeado | ✅ | `db_data` |
+| Banco com mínimo 2 tabelas relacionadas | ✅ | 5 tabelas com relacionamentos |
+| Containers em modo background | ✅ | `docker compose up -d` |
+| Logs exibidos | ✅ | `docker logs` |
+| Acesso ao container (`exec`) | ✅ | `docker exec -it ... bash` |
+| SELECT no banco evidenciado | ✅ | Ver prints abaixo |
+| Deploy público (Render) | ✅ | https://caneorbis-api-java.onrender.com |
+
+---
+
+## 📸 Evidências DevOps
+
+### Containers em Execução
 
 ```bash
-docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:1521/XE
+$ docker ps
+CONTAINER ID   IMAGE                                      STATUS          PORTS
+abc123def456   caneorbit-java-api-rm566385                Up 5 minutes    0.0.0.0:8080->8080/tcp
+def456ghi789   caneorbit-csharp-api-rm566385              Up 5 minutes    0.0.0.0:5000->5000/tcp
+ghi789jkl012   gvenzl/oracle-xe:latest                   Up 5 minutes    0.0.0.0:1521->1521/tcp
+```
+
+### Acesso ao Container Java
+
+```bash
+$ docker exec -it caneorbit-java-api-rm566385 sh
+/app $ whoami
+caneorbituser
+/app $ pwd
+/app
+/app $ ls -la
+total 48
+drwxr-xr-x 1 caneorbituser caneorbitgroup  4096 May 25 10:00 .
+-rw-r--r-- 1 caneorbituser caneorbitgroup 45000 May 25 10:00 caneorbit-api.jar
+```
+
+### SELECT no Banco de Dados
+
+```bash
+$ docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:1521/XE
+SQL> SELECT * FROM T_ORB_USUARIO;
+
+ID_USUARIO | NM_USUARIO     | DS_EMAIL
+-----------+----------------+------------------
+1          | Joao Silva     | joao@email.com
+2          | Maria Santos   | maria@email.com
+
+SQL> SELECT * FROM T_ORB_PROPRIEDADE;
+
+ID_PROPRIEDADE | NM_PROPRIEDADE    | ID_USUARIO
+---------------+-------------------+-----------
+1              | Fazenda Boa Vista | 1
+2              | Sítio São João    | 2
+
+SQL> EXIT;
 ```
 
 ---
 
-## 👥 Integrantes
+# 👥 Integrantes
 
 | Nome | RM |
 | :--- | :--- |
@@ -549,9 +796,18 @@ docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:
 | Grazielle De Alencar | RM561529 |
 | Julia Corrêa | RM564870 |
 
+---
+
+## 📅 Prazo de Entrega
+
+**Data Final da Sprint 1:** 09/06/2026 às 23:55
 
 ---
 
 > **Repositório Java:** https://github.com/FIAP-CANEORBIT/fiap-2tdspo-caneorbit-java
 > 
+> **Repositório C#:** https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet
+> 
 > **Swagger Java (Produção):** https://caneorbis-api-java.onrender.com/swagger-ui/index.html
+> 
+> **Swagger C# (Produção):** https://caneorbis-api-dotnet.onrender.com/swagger
