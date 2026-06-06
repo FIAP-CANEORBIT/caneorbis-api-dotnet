@@ -514,6 +514,10 @@ curl -X POST https://caneorbis-api-dotnet.onrender.com/api/Gemini/analisar \
 
 ## 🏗️ Arquitetura Macro da Solução na Nuvem
 
+> **📌 INSIRA A IMAGEM DA ARQUITETURA MACRO AQUI**
+> 
+> *Sugestão: Diagrama mostrando a estrutura completa na nuvem com API Java, API C#, Oracle Database, e integrações com serviços externos (EOS e Gemini).*
+
 ```
                     ┌─────────────────────────────────────────────────────────┐
                     │                    Render Cloud                          │
@@ -718,41 +722,32 @@ Os serviços já estão em produção nos links:
 
 ---
 
-## ✅ Verificações DevOps (Checklist)
-
-| Requisito | Status | Evidência |
-| :--- | :--- | :--- |
-| Container da aplicação com Dockerfile personalizado | ✅ | `Dockerfile` em ambos os repositórios |
-| Execução com usuário não privilegiado | ✅ | `caneorbituser` no Dockerfile |
-| Diretório de trabalho definido | ✅ | `WORKDIR /app` |
-| Variável de ambiente utilizada | ✅ | `.env` com `DB_PASSWORD`, `JWT_SECRET` |
-| Porta exposta | ✅ | 8080 (Java) e 5000 (C#) |
-| Nome do container com RM | ✅ | `caneorbit-java-api-rm566385` |
-| CRUD completo com mínimo 2 tabelas | ✅ | Usuário/Propriedade/Dispositivo/Leitura |
-| Container do banco com volume nomeado | ✅ | `db_data` |
-| Banco com mínimo 2 tabelas relacionadas | ✅ | 5 tabelas com relacionamentos |
-| Containers em modo background | ✅ | `docker compose up -d` |
-| Logs exibidos | ✅ | `docker logs` |
-| Acesso ao container (`exec`) | ✅ | `docker exec -it ... bash` |
-| SELECT no banco evidenciado | ✅ | Ver prints abaixo |
-| Deploy público (Render) | ✅ | https://caneorbis-api-java.onrender.com |
-
----
-
 ## 📸 Evidências DevOps
 
 ### Containers em Execução
 
-```bash
-$ docker ps
-CONTAINER ID   IMAGE                                      STATUS          PORTS
-abc123def456   caneorbit-java-api-rm566385                Up 5 minutes    0.0.0.0:8080->8080/tcp
-def456ghi789   caneorbit-csharp-api-rm566385              Up 5 minutes    0.0.0.0:5000->5000/tcp
-ghi789jkl012   gvenzl/oracle-xe:latest                   Up 5 minutes    0.0.0.0:1521->1521/tcp
-```
+> **📌 INSIRA A IMAGEM DO `docker ps` AQUI**
+> 
+> *Execute o comando `docker ps` e tire um print mostrando os 3 containers rodando:*
+> - `caneorbit-oracle-db-rm566385`
+> - `caneorbit-java-api-rm566385`
+> - `caneorbit-csharp-api-rm566385`
+
+---
 
 ### Acesso ao Container Java
 
+> **📌 INSIRA A IMAGEM DO ACESSO AO CONTAINER JAVA AQUI**
+> 
+> *Execute os comandos abaixo e tire prints:*
+> ```bash
+> docker exec -it caneorbit-java-api-rm566385 sh
+> whoami
+> pwd
+> ls -la
+> ```
+
+**Comandos executados:**
 ```bash
 $ docker exec -it caneorbit-java-api-rm566385 sh
 /app $ whoami
@@ -760,15 +755,26 @@ caneorbituser
 /app $ pwd
 /app
 /app $ ls -la
-total 48
-drwxr-xr-x 1 caneorbituser caneorbitgroup  4096 May 25 10:00 .
--rw-r--r-- 1 caneorbituser caneorbitgroup 45000 May 25 10:00 caneorbit-api.jar
 ```
+
+---
 
 ### SELECT no Banco de Dados
 
-```bash
-$ docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:1521/XE
+> **📌 INSIRA A IMAGEM DO SELECT NO BANCO AQUI**
+> 
+> *Execute os comandos abaixo e tire prints:*
+> ```bash
+> docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:1521/XE
+> SELECT * FROM T_ORB_USUARIO;
+> SELECT * FROM T_ORB_PROPRIEDADE;
+> SELECT * FROM T_ORB_DISPOSITIVO_IOT;
+> SELECT * FROM T_ORB_LEITURA_SENSOR;
+> EXIT;
+> ```
+
+**Exemplo de saída esperada:**
+```sql
 SQL> SELECT * FROM T_ORB_USUARIO;
 
 ID_USUARIO | NM_USUARIO     | DS_EMAIL
@@ -785,6 +791,36 @@ ID_PROPRIEDADE | NM_PROPRIEDADE    | ID_USUARIO
 
 SQL> EXIT;
 ```
+
+---
+
+### Logs dos Containers
+
+> **📌 INSIRA A IMAGEM DOS LOGS AQUI**
+> 
+> *Execute os comandos abaixo e tire prints:*
+> ```bash
+> docker logs caneorbit-java-api-rm566385 --tail 30
+> docker logs caneorbit-csharp-api-rm566385 --tail 30
+> ```
+
+---
+
+### Teste da API em Produção (Render)
+
+> **📌 INSIRA A IMAGEM DO SWAGGER UI EM PRODUÇÃO AQUI**
+> 
+> *Acesse o link e tire um print:*
+> - https://caneorbis-api-java.onrender.com/swagger-ui/index.html
+
+> **📌 INSIRA A IMAGEM DO TESTE DE ENDPOINT NO PRODUÇÃO AQUI**
+> 
+> *Execute um teste de criação de usuário e tire print da resposta:*
+> ```bash
+> curl -X POST https://caneorbis-api-java.onrender.com/api/usuarios/register \
+>   -H "Content-Type: application/json" \
+>   -d '{"nome":"Teste DevOps","email":"devops@teste.com","senha":"123456"}'
+> ```
 
 ---
 
