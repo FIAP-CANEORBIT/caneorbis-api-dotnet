@@ -445,16 +445,16 @@ src/main/java/.../caneorbit/
 
 ## 🛠️ Tecnologias Utilizadas (C#)
 
-| Tecnologia | Finalidade |
-|------------|------------|
-| .NET 8 | Framework principal da API |
-| ASP.NET Core Web API | Desenvolvimento da API REST |
-| Entity Framework Core | ORM e persistência de dados |
-| Oracle.EntityFrameworkCore | Integração com Oracle Database |
-| Oracle Database | Banco de dados relacional |
-| Swagger / OpenAPI | Documentação e testes da API |
-| EOS Data Analytics API | Coleta de dados de satélite e clima |
-| Google Gemini API | Geração de análises agrícolas com IA |
+| Tecnologia                 | Finalidade                           |
+| -------------------------- | ------------------------------------ |
+| .NET 8                     | Framework principal da API           |
+| ASP.NET Core Web API       | Desenvolvimento da API REST          |
+| Entity Framework Core      | ORM e persistência de dados          |
+| Oracle.EntityFrameworkCore | Integração com Oracle Database       |
+| Oracle Database            | Banco de dados relacional            |
+| Swagger / OpenAPI          | Documentação e testes da API         |
+| EOS Data Analytics API     | Coleta de dados de satélite e clima  |
+| Google Gemini API          | Geração de análises agrícolas com IA |
 
 ---
 
@@ -462,11 +462,11 @@ src/main/java/.../caneorbit/
 
 A API foi desenvolvida seguindo boas práticas de arquitetura em camadas:
 
-- Controllers: responsáveis por receber as requisições HTTP.
-- Services: responsáveis pelas regras de negócio e integrações externas.
-- DTOs: utilizados para entrada e saída de dados.
-- Models: representam as entidades persistidas no banco de dados.
-- Entity Framework Core: responsável pelo mapeamento objeto-relacional.
+* Controllers: responsáveis por receber as requisições HTTP.
+* Services: responsáveis pelas regras de negócio e integrações externas.
+* DTOs: utilizados para entrada e saída de dados.
+* Models: representam as entidades persistidas no banco de dados.
+* Entity Framework Core: responsável pelo mapeamento objeto-relacional.
 
 ---
 
@@ -476,13 +476,13 @@ A aplicação utiliza Oracle Database com persistência via Entity Framework Cor
 
 ### Relacionamentos implementados (C#)
 
-- Usuário (1:N) Propriedade
-- Propriedade (1:N) Field
-- Field (1:N) Dispositivo IoT
-- Dispositivo IoT (1:N) Leitura Sensor
-- Dispositivo IoT (1:N) Dado Satélite
+* Usuário (1:N) Propriedade
+* Propriedade (1:N) Field
+* Field (1:N) Dispositivo IoT
+* Dispositivo IoT (1:N) Leitura Sensor
+* Dispositivo IoT (1:N) Dado Satélite
 
-### Migration 
+### Migration
 
 A criação do banco foi realizada através de Migration do Entity Framework Core.
 
@@ -498,29 +498,29 @@ InitialCreate
 
 ### Gestão de Propriedades e Dispositivos
 
-- Cadastro de usuários.
-- Cadastro de propriedades agrícolas.
-- Cadastro de dispositivos IoT.
-- Associação de dispositivos a áreas agrícolas monitoradas.
+* Cadastro de usuários.
+* Cadastro de propriedades agrícolas.
+* Cadastro de dispositivos IoT.
+* Associação de dispositivos a áreas agrícolas monitoradas.
 
 ### Integração com EOS
 
 A API integra-se à plataforma EOS Data Analytics para:
 
-- Criar Fields na EOS.
-- Consultar índices de vegetação (NDVI).
-- Consultar dados climáticos.
-- Obter precipitação.
-- Obter temperatura do ar.
-- Obter condição climática.
+* Criar Fields na EOS.
+* Consultar índices de vegetação (NDVI).
+* Consultar dados climáticos.
+* Obter precipitação.
+* Obter temperatura do ar.
+* Obter condição climática.
 
 ### Monitoramento IoT
 
 A API permite registrar leituras simuladas dos sensores:
 
-- Umidade do solo.
-- Temperatura.
-- pH do solo.
+* Umidade do solo.
+* Temperatura.
+* pH do solo.
 
 ---
 
@@ -541,12 +541,12 @@ A funcionalidade realiza:
 
 A resposta retornada contém:
 
-- Resumo da situação da lavoura.
-- Alerta identificado.
-- Nível de risco.
-- Explicação simplificada.
-- Recomendação prática.
-- Nível de confiança da análise.
+* Resumo da situação da lavoura.
+* Alerta identificado.
+* Nível de risco.
+* Explicação simplificada.
+* Recomendação prática.
+* Nível de confiança da análise.
 
 ---
 
@@ -554,37 +554,110 @@ A resposta retornada contém:
 
 ### Leituras de Sensor
 
-| Método | Endpoint | Descrição |
-|----------|----------|----------|
-| GET | `/api/LeituraSensor` | Lista todas as leituras de sensor |
-| GET | `/api/LeituraSensor/{id}` | Busca uma leitura por ID |
-| POST | `/api/LeituraSensor` | Registra uma nova leitura de sensor |
-| PUT | `/api/LeituraSensor/{id}` | Atualiza uma leitura existente |
-| DELETE | `/api/LeituraSensor/{id}` | Remove uma leitura |
+| Método | Endpoint                                             | Descrição                                 |
+| ------ | ---------------------------------------------------- | ----------------------------------------- |
+| GET    | `/api/LeituraSensor`                                 | Lista todas as leituras de sensor         |
+| GET    | `/api/LeituraSensor/{id}`                            | Busca uma leitura por ID                  |
+| GET    | `/api/LeituraSensor/por-dispositivo/{idDispositivo}` | Lista todas as leituras de um dispositivo |
+| POST   | `/api/LeituraSensor`                                 | Registra uma nova leitura de sensor       |
+| PUT    | `/api/LeituraSensor/{id}`                            | Atualiza uma leitura existente            |
+| DELETE | `/api/LeituraSensor/{id}`                            | Remove uma leitura                        |
+
+#### JSON - POST/PUT LeituraSensor
+
+```json
+{
+  "idDispositivo": 1,
+  "vlUmidadeSolo": 68.5,
+  "vlTemperatura": 27.3,
+  "vlPhSolo": 6.2
+}
+```
+
+---
 
 ### Dados de Satélite e Clima
 
-| Método | Endpoint | Descrição |
-|----------|----------|----------|
-| GET | `/api/DadoSatelite` | Lista todos os dados de satélite/clima |
-| GET | `/api/DadoSatelite/{id}` | Busca um dado de satélite por ID |
-| POST | `/api/DadoSatelite` | Registra manualmente um dado de satélite/clima |
-| PUT | `/api/DadoSatelite/{id}` | Atualiza um dado de satélite/clima |
-| DELETE | `/api/DadoSatelite/{id}` | Remove um dado de satélite/clima |
-| POST | `/api/DadoSatelite/coletar/{idDispositivo}` | Coleta NDVI, clima e salva no banco |
+| Método | Endpoint                                            | Descrição                                          |
+| ------ | --------------------------------------------------- | -------------------------------------------------- |
+| GET    | `/api/DadoSatelite`                                 | Lista todos os dados de satélite/clima             |
+| GET    | `/api/DadoSatelite/{id}`                            | Busca um dado de satélite por ID                   |
+| GET    | `/api/DadoSatelite/por-dispositivo/{idDispositivo}` | Lista todos os dados de satélite de um dispositivo |
+| POST   | `/api/DadoSatelite`                                 | Registra manualmente um dado de satélite/clima     |
+| PUT    | `/api/DadoSatelite/{id}`                            | Atualiza um dado de satélite/clima                 |
+| DELETE | `/api/DadoSatelite/{id}`                            | Remove um dado de satélite/clima                   |
+| POST   | `/api/DadoSatelite/coletar/{idDispositivo}`         | Coleta NDVI, clima e salva no banco                |
+
+#### JSON - POST/PUT DadoSatelite
+
+```json
+{
+  "idDispositivo": 1,
+  "vlNdvi": 0.72,
+  "vlPrecipitacao": 15.4,
+  "vlTemperaturaAr": 28.7,
+  "dsCondicaoClima": "Parcialmente Nublado"
+}
+```
+
+---
+
+### Field
+
+| Método | Endpoint                                     | Descrição                                |
+| ------ | -------------------------------------------- | ---------------------------------------- |
+| GET    | `/api/Field/por-dispositivo/{idDispositivo}` | Retorna o Field associado ao dispositivo |
+
+---
 
 ### Integração EOS
 
-| Método | Endpoint | Descrição |
-|----------|----------|----------|
-| GET | `/api/Eos/ndvi` | Consulta NDVI por latitude e longitude |
-| POST | `/api/Field/criar-do-dispositivo/{idDispositivo}` | Cria um Field na EOS usando a localização do dispositivo |
+| Método | Endpoint                                          | Descrição                                                |
+| ------ | ------------------------------------------------- | -------------------------------------------------------- |
+| GET    | `/api/Eos/ndvi`                                   | Consulta NDVI por latitude e longitude                   |
+| POST   | `/api/Field/criar-do-dispositivo/{idDispositivo}` | Cria um Field na EOS usando a localização do dispositivo |
+
+#### Exemplo de chamada EOS
+
+```http
+POST /api/Field/criar-do-dispositivo/1
+```
+
+---
 
 ### Análise Agrícola com IA
 
-| Método | Endpoint | Descrição |
-|----------|----------|----------|
-| GET | `/api/AnaliseAgricola/dispositivo/{idDispositivo}` | Gera análise agrícola com Gemini usando a última leitura do sensor e o último dado de satélite/clima |
+| Método | Endpoint                                           | Descrição                                                                                            |
+| ------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| GET    | `/api/AnaliseAgricola/dispositivo/{idDispositivo}` | Gera análise agrícola com Gemini usando a última leitura do sensor e o último dado de satélite/clima |
+
+#### Exemplo de chamada IA
+
+```http
+GET /api/AnaliseAgricola/dispositivo/1
+```
+
+---
+
+## 🧪 Exemplos de Testes dos Novos Endpoints
+
+### Buscar todas as leituras de um dispositivo
+
+```http
+GET /api/LeituraSensor/por-dispositivo/1
+```
+
+### Buscar todos os dados de satélite de um dispositivo
+
+```http
+GET /api/DadoSatelite/por-dispositivo/1
+```
+
+### Buscar Field associado a um dispositivo
+
+```http
+GET /api/Field/por-dispositivo/1
+```
 
 ---
 
@@ -615,14 +688,17 @@ GET /api/AnaliseAgricola/dispositivo/1
 
 Testes realizados através do Swagger:
 
-- Cadastro de usuário.
-- Cadastro de propriedade.
-- Cadastro de dispositivo IoT.
-- Criação de Field na EOS.
-- Registro de leitura de sensor.
-- Coleta de dados de satélite.
-- Coleta de dados climáticos.
-- Geração de análise agrícola utilizando IA.
+* Cadastro de usuário.
+* Cadastro de propriedade.
+* Cadastro de dispositivo IoT.
+* Criação de Field na EOS.
+* Consulta de Field por dispositivo.
+* Registro de leitura de sensor.
+* Consulta de leituras por dispositivo.
+* Coleta de dados de satélite.
+* Consulta de dados de satélite por dispositivo.
+* Coleta de dados climáticos.
+* Geração de análise agrícola utilizando IA.
 
 Todos os endpoints foram validados com sucesso utilizando dados reais fornecidos pela EOS e análises geradas pelo Gemini.
 
@@ -645,7 +721,6 @@ Análise Agrícola Inteligente
 ```
 
 A solução transforma dados brutos de sensores e satélite em recomendações agrícolas compreensíveis para apoiar a tomada de decisão do produtor rural.
----
 
 # Disciplina 3: DevOps Tools & Cloud Computing
 
