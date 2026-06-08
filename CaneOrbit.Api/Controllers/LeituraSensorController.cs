@@ -105,5 +105,19 @@ namespace CaneOrbis.Api.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("por-dispositivo/{idDispositivo}")]
+        public async Task<IActionResult> GetLeiturasPorDispositivo(int idDispositivo)
+        {
+            var leituras = await _context.LeiturasSensor
+                .AsNoTracking()
+                .Where(l => l.IdDispositivo == idDispositivo)
+                .ToListAsync();
+
+            if (leituras == null || !leituras.Any())
+                return NotFound("Nenhuma leitura encontrada para este dispositivo.");
+
+            return Ok(leituras);
+        }
     }
 }
