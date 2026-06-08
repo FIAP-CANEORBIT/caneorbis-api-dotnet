@@ -604,26 +604,37 @@ A resposta retornada contém:
 
 ### Field
 
-| Método | Endpoint                                     | Descrição                                |
-| ------ | -------------------------------------------- | ---------------------------------------- |
-| GET    | `/api/Field/por-dispositivo/{idDispositivo}` | Retorna o Field associado ao dispositivo |
+| Método | Endpoint | Descrição |
+|----------|----------|----------|
+| GET | `/api/Field/por-dispositivo/{idDispositivo}` | Retorna o Field associado ao dispositivo |
+| POST | `/api/Field/criar-do-dispositivo/{idDispositivo}` | Cria um Field na EOS utilizando a localização do dispositivo |
 
----
-
-### Integração EOS
-
-| Método | Endpoint                                          | Descrição                                                |
-| ------ | ------------------------------------------------- | -------------------------------------------------------- |
-| GET    | `/api/Eos/ndvi`                                   | Consulta NDVI por latitude e longitude                   |
-| POST   | `/api/Field/criar-do-dispositivo/{idDispositivo}` | Cria um Field na EOS usando a localização do dispositivo |
-
-#### Exemplo de chamada EOS
+#### Exemplo de chamada
 
 ```http
 POST /api/Field/criar-do-dispositivo/1
 ```
 
+#### Exemplo de resposta
+
+```json
+{
+  "idField": 1,
+  "idEosField": 123456,
+  "nmField": "Field Dispositivo 1",
+  "vlAreaHectare": 10.5,
+  "idPropriedade": 1
+}
+```
 ---
+
+### Integração EOS
+
+| Método | Endpoint | Descrição |
+|----------|----------|----------|
+| GET | `/api/Eos/ndvi` | Consulta NDVI por latitude e longitude |
+
+----
 
 ### Análise Agrícola com IA
 
@@ -699,6 +710,8 @@ Testes realizados através do Swagger:
 * Consulta de dados de satélite por dispositivo.
 * Coleta de dados climáticos.
 * Geração de análise agrícola utilizando IA.
+* Criação de Field a partir de dispositivo.
+* Consulta de Field por dispositivo.
 
 Todos os endpoints foram validados com sucesso utilizando dados reais fornecidos pela EOS e análises geradas pelo Gemini.
 
