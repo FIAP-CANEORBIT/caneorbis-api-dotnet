@@ -170,5 +170,19 @@ namespace CaneOrbis.Api.Controllers
 
             return NoContent();
         }
+        [HttpGet("por-dispositivo/{idDispositivo}")]
+        public async Task<IActionResult> GetDadosSatelitePorDispositivo(int idDispositivo)
+        {
+            var dadosSatelite = await _context.DadosSatelite
+                .AsNoTracking()
+                .Where(d => d.IdDispositivo == idDispositivo)
+                .ToListAsync();
+
+            if (dadosSatelite == null || !dadosSatelite.Any())
+                return NotFound("Nenhuma leitura de satélite encontrada para este dispositivo.");
+
+            return Ok(dadosSatelite);
+        }
+
     }
 }
