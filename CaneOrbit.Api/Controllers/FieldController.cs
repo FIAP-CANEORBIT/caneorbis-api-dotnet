@@ -77,5 +77,37 @@ namespace CaneOrbis.Api.Controllers
                 dispositivo.IdDispositivo
             });
         }
+
+        [HttpGet("por-dispositivo/{idDispositivo}")]
+        public async Task<IActionResult> GetFieldPorDispositivo(int idDispositivo)
+        {
+            var dispositivo = await _context.DispositivosIot
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.IdDispositivo == idDispositivo);
+
+            if (dispositivo == null)
+                return NotFound("Dispositivo não encontrado.");
+
+            if (dispositivo.IdField == null)
+                return NotFound("Este dispositivo não está vinculado a nenhum Field.");
+
+            var field = await _context.Fields
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.IdField == dispositivo.IdField.Value);
+
+            if (field == null)
+                return NotFound("Field vinculado ao dispositivo não foi encontrado.");
+
+            return Ok(new
+            {
+                field.IdField,
+                field.IdPropriedade,
+                field.IdEosField,
+                field.NmField,
+                field.VlAreaHectare,
+                field.DtCriacao,
+                dispositivo.IdDispositivo
+            });
+        }
     }
 }
