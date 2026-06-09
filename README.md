@@ -739,7 +739,7 @@ A solução transforma dados brutos de sensores e satélite em recomendações a
 
 ## 🏗️ Arquitetura Macro da Solução na Nuvem
 
-![Arquitetura Macro](./deploy-screenshots/arquitetura-macro.png)
+![Arquitetura Macro](./images/arquitetura-macro.png)
 
 *Diagrama mostrando a estrutura completa na nuvem com API Java, API C#, Oracle Database, e integrações com serviços externos (EOS e Gemini).*
 
@@ -795,7 +795,7 @@ A solução transforma dados brutos de sensores e satélite em recomendações a
 ### Evidências do Deploy na Azure
 
 #### VM no Portal Azure
-![VM Azure](./deploy-screenshots/azure-vm.png)
+![VM Azure](./images/azure-vm.png)
 
 ---
 
@@ -920,7 +920,7 @@ JWT_SECRET=minha-chave-secreta-123
 
 ### Containers em Execução
 
-![Docker PS](./deploy-screenshots/docker-ps.png)
+![Docker PS](./images/docker-ps.png)
 
 ```bash
 $ docker ps
@@ -934,7 +934,7 @@ ffa733620bb1   gvenzl/oracle-xe:latest           "container-entrypoin…"   3 mi
 
 ### Acesso ao Container Java
 
-![Docker Exec Java](./deploy-screenshots/docker-exec-java.png)
+![Docker Exec Java](./images/docker-exec-java.png)
 
 ```bash
 $ docker exec -it caneorbit-java-api-rm566385 sh
@@ -953,7 +953,7 @@ drwxr-xr-x 1 root          root              4096 Jun  9 15:09 ..
 
 ### Acesso ao Container C#
 
-![Docker Exec CSharp](./deploy-screenshots/docker-exec-csharp.png)
+![Docker Exec CSharp](./images/docker-exec-csharp.png)
 
 ```bash
 $ docker exec -it caneorbit-csharp-api-rm566385 sh
@@ -977,7 +977,7 @@ drwxr-xr-x 1 root    root      4096 Jun  9 15:09 ..
 
 #### Logs API Java
 
-![Logs Java](./deploy-screenshots/logs-java.png)
+![Logs Java](./images/logs-java.png)
 
 ```bash
 $ docker logs caneorbit-java-api-rm566385 --tail 30
@@ -994,7 +994,7 @@ $ docker logs caneorbit-java-api-rm566385 --tail 30
 
 #### Logs API C#
 
-![Logs CSharp](./deploy-screenshots/logs-csharp.png)
+![Logs CSharp](./images/logs-csharp.png)
 
 ```bash
 $ docker logs caneorbit-csharp-api-rm566385 --tail 30
@@ -1024,7 +1024,7 @@ info: Microsoft.Hosting.Lifetime[0]
 
 ### SELECT no Banco de Dados
 
-![SELECT Usuario](./deploy-screenshots/select-usuario.png)
+![SELECT Usuario](./images/select-usuario.png)
 
 ```sql
 $ docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:1521/XE
@@ -1046,17 +1046,17 @@ ID_PROPRIEDADE | NM_PROPRIEDADE    | ID_USUARIO
 
 SQL> SELECT * FROM T_ORB_DISPOSITIVO_IOT;
 
-ID_DISPOSITIVO | DS_NOME  | DS_MAC_ADDRESS    | ID_FIELD
----------------+----------+-------------------+----------
-1              | Sensor 1 | AA:BB:CC:DD:EE:01 | 1
-2              | Sensor 2 | AA:BB:CC:DD:EE:02 | 1
+ID_DISPOSITIVO | DS_NOME      | DS_MAC_ADDRESS    | ID_FIELD
+---------------+--------------+-------------------+----------
+1              | Sensor 1     | AA:BB:CC:DD:EE:01 | 1
+2              | Sensor 2     | AA:BB:CC:DD:EE:02 | 1
 
 SQL> SELECT * FROM T_ORB_LEITURA_SENSOR;
 
-ID_LEITURA | DS_VALOR | DT_LEITURA           | ID_DISPOSITIVO
------------+----------+----------------------+---------------
-1          | 25.5     | 09-JUN-2026 10:00:00 | 1
-2          | 26.0     | 09-JUN-2026 10:05:00 | 1
+ID_LEITURA | DS_VALOR | DT_LEITURA              | ID_DISPOSITIVO
+-----------+----------+-------------------------+---------------
+1          | 25.5     | 09-JUN-2026 10:00:00    | 1
+2          | 26.0     | 09-JUN-2026 10:05:00    | 1
 
 SQL> EXIT;
 ```
@@ -1067,7 +1067,7 @@ SQL> EXIT;
 
 #### Teste de Criação de Usuário
 
-![Curl Register](./deploy-screenshots/curl-register.png)
+![Curl Register](./images/curl-register.png)
 
 ```bash
 $ curl -X POST http://localhost:8080/api/usuarios/register \
@@ -1079,7 +1079,7 @@ $ curl -X POST http://localhost:8080/api/usuarios/register \
 
 #### Teste de Login
 
-![Curl Login](./deploy-screenshots/curl-login.png)
+![Curl Login](./images/curl-login.png)
 
 ```bash
 $ curl -X POST http://localhost:8080/api/auth/login \
@@ -1091,13 +1091,13 @@ $ curl -X POST http://localhost:8080/api/auth/login \
 
 #### Swagger UI API Java
 
-![Swagger Java](./deploy-screenshots/swagger-java.png)
+![Swagger Java](./images/swagger-java.png)
 
 Acessar: `http://<IP_DA_VM>:8080/swagger-ui/index.html`
 
 #### Swagger UI API C#
 
-![Swagger CSharp](./deploy-screenshots/swagger-csharp.png)
+![Swagger CSharp](./images/swagger-csharp.png)
 
 Acessar: `http://<IP_DA_VM>:5000/swagger`
 
