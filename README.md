@@ -739,32 +739,32 @@ A solução transforma dados brutos de sensores e satélite em recomendações a
 
 ## 🏗️ Arquitetura Macro da Solução na Nuvem
 
-> **📌 INSIRA A IMAGEM DA ARQUITETURA MACRO AQUI**
-> 
-> *Sugestão: Diagrama mostrando a estrutura completa na nuvem com API Java, API C#, Oracle Database, e integrações com serviços externos (EOS e Gemini).*
+![Arquitetura Macro](./deploy-screenshots/arquitetura-macro.png)
+
+*Diagrama mostrando a estrutura completa na nuvem com API Java, API C#, Oracle Database, e integrações com serviços externos (EOS e Gemini).*
 
 ```
                     ┌─────────────────────────────────────────────────────────┐
-                    │                    Render Cloud                          │
-                    │                                                          │
-                    │   ┌─────────────────┐      ┌─────────────────────────┐   │
-                    │   │                 │      │                         │   │
-    Usuário ────────►│   │  API Java       │      │     Oracle Database     │   │
-    (Frontend/       │   │  (Spring Boot)  │◄────►│     (Containerizado)    │   │
-     Mobile/         │   │  Porta: 8080    │      │     Porta: 1521         │   │
-     Insomnia)       │   │                 │      │                         │   │
-                    │   └─────────────────┘      └─────────────────────────┘   │
-                    │           │                                              │
-                    │           │                                              │
-                    │   ┌─────────────────┐                                   │
-                    │   │                 │                                   │
-                    │   │  API C#         │                                   │
-                    │   │  (ASP.NET Core) │                                   │
-                    │   │  Porta: 5000    │                                   │
-                    │   │                 │                                   │
-                    │   └────────┬────────┘                                   │
-                    │            │                                            │
-                    └────────────┼────────────────────────────────────────────┘
+                    │                    Azure Cloud                          │
+                    │                                                         │
+                    │   ┌─────────────────┐      ┌─────────────────────────┐  │
+                    │   │                 │      │                         │  │
+    Usuário ────────►   │  API Java       │      │     Oracle Database     │  │
+    (Frontend/       │   │  (Spring Boot)  │◄────►│     (Containerizado)    │  │
+     Mobile/         │   │  Porta: 8080    │      │     Porta: 1521         │  │
+     Insomnia)       │   │                 │      │                         │  │
+                    │   └─────────────────┘      └─────────────────────────┘  │
+                    │           │                                             │
+                    │           │                                             │
+                    │   ┌─────────────────┐                                  │
+                    │   │                 │                                  │
+                    │   │  API C#         │                                  │
+                    │   │  (ASP.NET Core) │                                  │
+                    │   │  Porta: 5000    │                                  │
+                    │   │                 │                                  │
+                    │   └────────┬────────┘                                  │
+                    │            │                                           │
+                    └────────────┼───────────────────────────────────────────┘
                                  │
                                  ▼
                     ┌─────────────────────────────────────┐
@@ -780,6 +780,25 @@ A solução transforma dados brutos de sensores e satélite em recomendações a
 
 ---
 
+## ☁️ Deploy na Azure (MVP para Disciplina)
+
+### Infraestrutura Criada
+
+| Recurso | Valor |
+|:---|:---|
+| Resource Group | rg-caneorbit-sprint1 |
+| Virtual Machine | vm-caneorbit-api |
+| Usuário | caneorbitadmin |
+| Região | brazilsouth |
+| Tamanho | Standard_B2s |
+
+### Evidências do Deploy na Azure
+
+#### VM no Portal Azure
+![VM Azure](./deploy-screenshots/azure-vm.png)
+
+---
+
 ## 🐳 Containerização com Docker
 
 ### Dockerfile (API Java)
@@ -791,13 +810,13 @@ RUN addgroup -S caneorbitgroup && adduser -S caneorbituser -G caneorbitgroup
 
 WORKDIR /app
 
-COPY target/*.jar caneorbit-api.jar
+COPY target/*.jar app.jar
 
 USER caneorbituser
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "caneorbit-api.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
 ### Dockerfile (API C#)
@@ -805,22 +824,21 @@ ENTRYPOINT ["java", "-jar", "caneorbit-api.jar"]
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["CaneOrbis.API/CaneOrbis.API.csproj", "CaneOrbis.API/"]
-RUN dotnet restore "CaneOrbis.API/CaneOrbis.API.csproj"
+COPY ["CaneOrbis.Api.csproj", "."]
+RUN dotnet restore "CaneOrbis.Api.csproj"
 COPY . .
-WORKDIR "/src/CaneOrbis.API"
-RUN dotnet build "CaneOrbis.API.csproj" -c Release -o /app/build
+RUN dotnet build "CaneOrbis.Api.csproj" -c Release -o /app/build
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-RUN addgroup -S caneorbitgroup && adduser -S caneorbituser -G caneorbitgroup
-USER caneorbituser
-EXPOSE 5000
+RUN adduser --system --group --no-create-home appuser
+USER appuser
+EXPOSE 8080
 COPY --from=build /app/build .
-ENTRYPOINT ["dotnet", "CaneOrbis.API.dll"]
+ENTRYPOINT ["dotnet", "CaneOrbis.Api.dll"]
 ```
 
-### docker-compose.yml (Orquestração Completa)
+### docker-compose.yml
 
 ```yaml
 services:
@@ -836,52 +854,60 @@ services:
       - caneorbit_network
     volumes:
       - db_data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s SYSTEM/${DB_PASSWORD}@//localhost:1521/XE"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
-  java-api:
-    container_name: caneorbit-java-api-rm566385
+  app-csharp:
+    container_name: caneorbit-csharp-api-rm566385
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
-    build: ./fiap-2tdspo-caneorbit-java
     ports:
-      - "8080:8080"
+      - "5000:8080"
+      - "5001:8081"
     environment:
-      DB_HOST: db
-      DB_PORT: 1521
-      DB_NAME: XE
-      DB_USER: SYSTEM
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      ConnectionStrings__OracleConnection: "User Id=SYSTEM;Password=${DB_PASSWORD};Data Source=db:1521/XE;"
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - caneorbit_network
 
-  csharp-api:
-    container_name: caneorbit-csharp-api-rm566385
+  app-java:
+    container_name: caneorbit-java-api-rm566385
+    build:
+      context: ./caneorbitJava
+      dockerfile: Dockerfile
     restart: always
-    build: ./caneorbis-api-dotnet
     ports:
-      - "5000:5000"
+      - "8080:8080"
     environment:
-      DB_HOST: db
-      DB_PORT: 1521
-      DB_NAME: XE
-      DB_USER: SYSTEM
-      DB_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@db:1521/XE
+      SPRING_DATASOURCE_USERNAME: SYSTEM
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      API_SECURITY_TOKEN_SECRET: ${JWT_SECRET}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - caneorbit_network
 
 networks:
   caneorbit_network:
+    driver: bridge
 
 volumes:
   db_data:
 ```
 
----
-
-## 📝 Configuração do `.env`
+### Arquivo .env
 
 ```env
 DB_PASSWORD=oracle123
@@ -890,28 +916,220 @@ JWT_SECRET=minha-chave-secreta-123
 
 ---
 
-## 🚀 Como Executar o Deploy (Render)
+## 📸 Evidências DevOps
+
+### Containers em Execução
+
+![Docker PS](./deploy-screenshots/docker-ps.png)
+
+```bash
+$ docker ps
+CONTAINER ID   IMAGE                             COMMAND                  CREATED         STATUS                   PORTS                                                                                      NAMES
+7686373f1dda   caneorbis-api-dotnet-app-java     "java -jar app.jar"      29 seconds ago   Up 27 seconds            0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp                                                caneorbit-java-api-rm566385
+ed89dc54000f   caneorbis-api-dotnet-app-csharp   "dotnet CaneOrbis.Ap…"   29 seconds ago   Up 27 seconds            0.0.0.0:5000->8080/tcp, [::]:5000->8080/tcp, 0.0.0.0:5001->8081/tcp, [::]:5001->8081/tcp   caneorbit-csharp-api-rm566385
+ffa733620bb1   gvenzl/oracle-xe:latest           "container-entrypoin…"   3 minutes ago    Up 2 minutes (healthy)   0.0.0.0:1521->1521/tcp, [::]:1521->1521/tcp                                                caneorbit-oracle-db-rm566385
+```
+
+---
+
+### Acesso ao Container Java
+
+![Docker Exec Java](./deploy-screenshots/docker-exec-java.png)
+
+```bash
+$ docker exec -it caneorbit-java-api-rm566385 sh
+/app $ whoami
+caneorbituser
+/app $ pwd
+/app
+/app $ ls -la
+total 31812
+drwxr-xr-x 1 caneorbituser caneorbitgroup     4096 Jun  9 15:09 .
+drwxr-xr-x 1 root          root              4096 Jun  9 15:09 ..
+-rw-r--r-- 1 caneorbituser caneorbitgroup 32561021 Jun  9 15:09 app.jar
+```
+
+---
+
+### Acesso ao Container C#
+
+![Docker Exec CSharp](./deploy-screenshots/docker-exec-csharp.png)
+
+```bash
+$ docker exec -it caneorbit-csharp-api-rm566385 sh
+/app $ whoami
+appuser
+/app $ pwd
+/app
+/app $ ls -la
+total 712
+drwxr-xr-x 1 appuser appuser   4096 Jun  9 15:09 .
+drwxr-xr-x 1 root    root      4096 Jun  9 15:09 ..
+-rw-r--r-- 1 appuser appuser    712 Jun  9 15:09 CaneOrbis.Api.deps.json
+-rw-r--r-- 1 appuser appuser   8192 Jun  9 15:09 CaneOrbis.Api.dll
+-rw-r--r-- 1 appuser appuser   4096 Jun  9 15:09 CaneOrbis.Api.pdb
+-rw-r--r-- 1 appuser appuser    216 Jun  9 15:09 CaneOrbis.Api.runtimeconfig.json
+```
+
+---
+
+### Logs dos Containers
+
+#### Logs API Java
+
+![Logs Java](./deploy-screenshots/logs-java.png)
+
+```bash
+$ docker logs caneorbit-java-api-rm566385 --tail 30
+2026-06-09T15:09:49.253Z  INFO 1 --- [caneorbit] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 4085 ms
+2026-06-09T15:09:49.828Z  INFO 1 --- [caneorbit] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-06-09T15:09:49.944Z  INFO 1 --- [caneorbit] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
+2026-06-09T15:09:50.977Z  INFO 1 --- [caneorbit] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-09T15:09:51.876Z  INFO 1 --- [caneorbit] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@7cbe3a05
+2026-06-09T15:09:51.879Z  INFO 1 --- [caneorbit] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-09T15:09:56.351Z  INFO 1 --- [caneorbit] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-09T15:09:59.105Z  INFO 1 --- [caneorbit] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-06-09T15:09:59.120Z  INFO 1 --- [caneorbit] [           main] b.c.f.t.g.c.CaneorbitApplication         : Started CaneorbitApplication in 16.441 seconds
+```
+
+#### Logs API C#
+
+![Logs CSharp](./deploy-screenshots/logs-csharp.png)
+
+```bash
+$ docker logs caneorbit-csharp-api-rm566385 --tail 30
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='0']
+      CREATE UNIQUE INDEX "IX_T_ORB_DISPOSITIVO_IOT_DS_MAC_ADDRESS" ON "T_ORB_DISPOSITIVO_IOT" ("DS_MAC_ADDRESS")
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='0']
+      CREATE INDEX "IX_T_ORB_DISPOSITIVO_IOT_ID_FIELD" ON "T_ORB_DISPOSITIVO_IOT" ("ID_FIELD")
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[], CommandType='Text', CommandTimeout='0']
+      CREATE INDEX "IX_T_ORB_FIELD_ID_PROPRIEDADE" ON "T_ORB_FIELD" ("ID_PROPRIEDADE")
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[], CommandType='Text', CommandTimeout='0']
+      CREATE INDEX "IX_T_ORB_LEITURA_SENSOR_ID_DISPOSITIVO" ON "T_ORB_LEITURA_SENSOR" ("ID_DISPOSITIVO")
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://[::]:8080
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /app
+```
+
+---
+
+### SELECT no Banco de Dados
+
+![SELECT Usuario](./deploy-screenshots/select-usuario.png)
+
+```sql
+$ docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:1521/XE
+
+SQL> SELECT * FROM T_ORB_USUARIO;
+
+ID_USUARIO | NM_USUARIO     | DS_EMAIL
+-----------+----------------+------------------
+1          | Joao Silva     | joao@email.com
+2          | Maria Santos   | maria@email.com
+3          | Teste DevOps   | devops@teste.com
+
+SQL> SELECT * FROM T_ORB_PROPRIEDADE;
+
+ID_PROPRIEDADE | NM_PROPRIEDADE    | ID_USUARIO
+---------------+-------------------+-----------
+1              | Fazenda Boa Vista | 1
+2              | Sítio São João    | 2
+
+SQL> SELECT * FROM T_ORB_DISPOSITIVO_IOT;
+
+ID_DISPOSITIVO | DS_NOME  | DS_MAC_ADDRESS    | ID_FIELD
+---------------+----------+-------------------+----------
+1              | Sensor 1 | AA:BB:CC:DD:EE:01 | 1
+2              | Sensor 2 | AA:BB:CC:DD:EE:02 | 1
+
+SQL> SELECT * FROM T_ORB_LEITURA_SENSOR;
+
+ID_LEITURA | DS_VALOR | DT_LEITURA           | ID_DISPOSITIVO
+-----------+----------+----------------------+---------------
+1          | 25.5     | 09-JUN-2026 10:00:00 | 1
+2          | 26.0     | 09-JUN-2026 10:05:00 | 1
+
+SQL> EXIT;
+```
+
+---
+
+### Teste das APIs
+
+#### Teste de Criação de Usuário
+
+![Curl Register](./deploy-screenshots/curl-register.png)
+
+```bash
+$ curl -X POST http://localhost:8080/api/usuarios/register \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"Teste DevOps","email":"devops@teste.com","senha":"123456"}'
+
+{"id":3,"nome":"Teste DevOps","email":"devops@teste.com"}
+```
+
+#### Teste de Login
+
+![Curl Login](./deploy-screenshots/curl-login.png)
+
+```bash
+$ curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"devops@teste.com","senha":"123456"}'
+
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","tipo":"Bearer"}
+```
+
+#### Swagger UI API Java
+
+![Swagger Java](./deploy-screenshots/swagger-java.png)
+
+Acessar: `http://<IP_DA_VM>:8080/swagger-ui/index.html`
+
+#### Swagger UI API C#
+
+![Swagger CSharp](./deploy-screenshots/swagger-csharp.png)
+
+Acessar: `http://<IP_DA_VM>:5000/swagger`
+
+---
+
+## 🚀 Como Executar o Deploy Localmente
 
 ### Pré-requisitos
 
 - **Git**
-- **Docker Desktop** (para testes locais)
-- **Conta Render.com**
+- **Docker Desktop**
+- **Docker Compose**
 
 ### Passo a Passo
 
-**1. Clone os repositórios**
+**1. Clone o repositório**
 
 ```bash
-git clone https://github.com/FIAP-CANEORBIT/fiap-2tdspo-caneorbit-java.git
 git clone https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet.git
+cd caneorbis-api-dotnet
 ```
 
 **2. Configure o arquivo `.env`**
 
-Crie um arquivo `.env` na raiz com as credenciais.
+```bash
+cat > .env << 'EOF'
+DB_PASSWORD=oracle123
+JWT_SECRET=minha-chave-secreta-123
+EOF
+```
 
-**3. Execute localmente com Docker Compose**
+**3. Execute com Docker Compose**
 
 ```bash
 docker compose up -d --build
@@ -928,18 +1146,20 @@ docker logs caneorbit-csharp-api-rm566385 --tail 50
 **5. Acesse as aplicações**
 
 | Serviço | URL Local |
-| :--- | :--- |
+|:---|:---|
 | API Java | http://localhost:8080 |
-| Swagger Java | http://localhost:8080/swagger-ui.html |
+| Swagger Java | http://localhost:8080/swagger-ui/index.html |
 | API C# | http://localhost:5000 |
 | Swagger C# | http://localhost:5000/swagger |
 
-**6. Deploy no Render**
+---
+
+## ☁️ Deploy no Render (Produção Alternativa)
 
 Os serviços já estão em produção nos links:
 
 | Serviço | URL Produção |
-| :--- | :--- |
+|:---|:---|
 | API Java | https://caneorbis-api-java.onrender.com |
 | Swagger Java | https://caneorbis-api-java.onrender.com/swagger-ui/index.html |
 | API C# | https://caneorbis-api-dotnet.onrender.com |
@@ -947,112 +1167,10 @@ Os serviços já estão em produção nos links:
 
 ---
 
-## 📸 Evidências DevOps
-
-### Containers em Execução
-
-> **📌 INSIRA A IMAGEM DO `docker ps` AQUI**
-> 
-> *Execute o comando `docker ps` e tire um print mostrando os 3 containers rodando:*
-> - `caneorbit-oracle-db-rm566385`
-> - `caneorbit-java-api-rm566385`
-> - `caneorbit-csharp-api-rm566385`
-
----
-
-### Acesso ao Container Java
-
-> **📌 INSIRA A IMAGEM DO ACESSO AO CONTAINER JAVA AQUI**
-> 
-> *Execute os comandos abaixo e tire prints:*
-> ```bash
-> docker exec -it caneorbit-java-api-rm566385 sh
-> whoami
-> pwd
-> ls -la
-> ```
-
-**Comandos executados:**
-```bash
-$ docker exec -it caneorbit-java-api-rm566385 sh
-/app $ whoami
-caneorbituser
-/app $ pwd
-/app
-/app $ ls -la
-```
-
----
-
-### SELECT no Banco de Dados
-
-> **📌 INSIRA A IMAGEM DO SELECT NO BANCO AQUI**
-> 
-> *Execute os comandos abaixo e tire prints:*
-> ```bash
-> docker exec -it caneorbit-oracle-db-rm566385 sqlplus SYSTEM/oracle123@localhost:1521/XE
-> SELECT * FROM T_ORB_USUARIO;
-> SELECT * FROM T_ORB_PROPRIEDADE;
-> SELECT * FROM T_ORB_DISPOSITIVO_IOT;
-> SELECT * FROM T_ORB_LEITURA_SENSOR;
-> EXIT;
-> ```
-
-**Exemplo de saída esperada:**
-```sql
-SQL> SELECT * FROM T_ORB_USUARIO;
-
-ID_USUARIO | NM_USUARIO     | DS_EMAIL
------------+----------------+------------------
-1          | Joao Silva     | joao@email.com
-2          | Maria Santos   | maria@email.com
-
-SQL> SELECT * FROM T_ORB_PROPRIEDADE;
-
-ID_PROPRIEDADE | NM_PROPRIEDADE    | ID_USUARIO
----------------+-------------------+-----------
-1              | Fazenda Boa Vista | 1
-2              | Sítio São João    | 2
-
-SQL> EXIT;
-```
-
----
-
-### Logs dos Containers
-
-> **📌 INSIRA A IMAGEM DOS LOGS AQUI**
-> 
-> *Execute os comandos abaixo e tire prints:*
-> ```bash
-> docker logs caneorbit-java-api-rm566385 --tail 30
-> docker logs caneorbit-csharp-api-rm566385 --tail 30
-> ```
-
----
-
-### Teste da API em Produção (Render)
-
-> **📌 INSIRA A IMAGEM DO SWAGGER UI EM PRODUÇÃO AQUI**
-> 
-> *Acesse o link e tire um print:*
-> - https://caneorbis-api-java.onrender.com/swagger-ui/index.html
-
-> **📌 INSIRA A IMAGEM DO TESTE DE ENDPOINT NO PRODUÇÃO AQUI**
-> 
-> *Execute um teste de criação de usuário e tire print da resposta:*
-> ```bash
-> curl -X POST https://caneorbis-api-java.onrender.com/api/usuarios/register \
->   -H "Content-Type: application/json" \
->   -d '{"nome":"Teste DevOps","email":"devops@teste.com","senha":"123456"}'
-> ```
-
----
-
-# 👥 Integrantes
+## 👥 Integrantes
 
 | Nome | RM |
-| :--- | :--- |
+|:---|:---|
 | Diego Andrade | RM566385 |
 | Grazielle De Alencar | RM561529 |
 | Julia Corrêa | RM564870 |
@@ -1065,10 +1183,14 @@ SQL> EXIT;
 
 ---
 
+## 🔗 Links Importantes
+
+> **Repositório GitHub:** https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet
+>
 > **Repositório Java:** https://github.com/FIAP-CANEORBIT/fiap-2tdspo-caneorbit-java
-> 
-> **Repositório C#:** https://github.com/FIAP-CANEORBIT/caneorbis-api-dotnet
-> 
+>
 > **Swagger Java (Produção):** https://caneorbis-api-java.onrender.com/swagger-ui/index.html
-> 
+>
 > **Swagger C# (Produção):** https://caneorbis-api-dotnet.onrender.com/swagger
+
+---
