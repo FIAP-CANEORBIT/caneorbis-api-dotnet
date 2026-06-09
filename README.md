@@ -1093,6 +1093,14 @@ Os serviços já estão em produção nos links:
 
 ---
 
+## 🎥 Vídeo Demonstrativo
+
+[![Vídeo Demonstrativo - CaneOrbit DevOps](https://img.youtube.com/vi/PygFG75NVcg/maxresdefault.jpg)](https://www.youtube.com/watch?v=PygFG75NVcg)
+
+> **Assista no YouTube:** https://www.youtube.com/watch?v=PygFG75NVcg
+
+---
+
 ## 👥 Integrantes
 
 | Nome | RM |
@@ -1118,3 +1126,5 @@ Os serviços já estão em produção nos links:
 > **Swagger Java (Produção):** https://caneorbis-api-java.onrender.com/swagger-ui/index.html
 >
 > **Swagger C# (Produção):** https://caneorbis-api-dotnet.onrender.com/swagger
+>
+> **Vídeo Demonstrativo:** https://www.youtube.com/watch?v=PygFG75NVcg
