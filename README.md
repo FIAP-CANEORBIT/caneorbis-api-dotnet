@@ -14,7 +14,7 @@
 | **Swagger UI - C# (Produção)** | https://caneorbis-api-dotnet.onrender.com/swagger |
 | **API Java Base (Produção)** | https://caneorbis-api-java.onrender.com |
 | **API C# Base (Produção)** | https://caneorbis-api-dotnet.onrender.com |
-| **Vídeo de Apresentação (10 min)** | https://www.youtube.com/watch?v=WDscwR_ILag |
+| **Vídeo de Apresentação (10 min)** | https://youtu.be/5QxZ_6FD8V0?si=kmPXI2dIMqHrGbkF |
 | **Video Pitch C# (3 min)** | https://youtu.be/0EFYzRW-o-0 |
 | **Video Pitch Projeto (3 min)** | https://youtu.be/izUM9V-_D7g |
 
@@ -464,6 +464,13 @@ src/main/java/.../caneorbit/
 ---
 
 # Disciplina 2: Advanced Business Development with .NET (C#)
+
+## Links vídeos
+Video apresentação:
+https://youtu.be/5QxZ_6FD8V0?si=kmPXI2dIMqHrGbkF
+
+vídeo pitch:
+https://youtu.be/0EFYzRW-o-0?feature=shared
 
 ## 🛠️ Tecnologias Utilizadas (C#)
 
