@@ -578,6 +578,29 @@ A resposta retornada contém:
 * Recomendação prática.
 * Nível de confiança da análise.
 
+«⚠️ Configuração obrigatória da API do Gemini
+
+Para que as funcionalidades de Inteligência Artificial funcionem corretamente em ambiente local, é necessário configurar uma chave de API válida do Google Gemini.
+
+Por motivos de segurança, a chave não está versionada no repositório e o arquivo "appsettings.json" contém apenas a estrutura da configuração.
+
+Como configurar:
+
+1. Acesse o Google AI Studio e gere uma chave de API do Gemini.
+2. Abra o arquivo "appsettings.json".
+3. Localize a seção de configuração do Gemini.
+4. Substitua o valor da propriedade "ApiKey" pela sua chave:
+
+"Gemini": {
+  "ApiKey": "SUA_API_KEY_AQUI"
+}
+
+5. Salve o arquivo e execute a aplicação normalmente.
+
+Sem uma chave válida, as funcionalidades relacionadas à IA poderão apresentar erros ou não retornar respostas.
+
+Importante: nunca faça commit da sua chave de API em repositórios públicos.»
+
 ---
 
 ## 📡 Principais Endpoints da API C#
