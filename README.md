@@ -15,7 +15,8 @@
 | **API Java Base (Produção)** | https://caneorbis-api-java.onrender.com |
 | **API C# Base (Produção)** | https://caneorbis-api-dotnet.onrender.com |
 | **Vídeo de Apresentação (10 min)** | https://www.youtube.com/watch?v=WDscwR_ILag |
-| **Video Pitch (3 min)** | https://youtu.be/0EFYzRW-o-0 |
+| **Video Pitch C# (3 min)** | https://youtu.be/0EFYzRW-o-0 |
+| **Video Pitch Projeto (3 min)** | https://youtu.be/izUM9V-_D7g |
 
 ---
 
