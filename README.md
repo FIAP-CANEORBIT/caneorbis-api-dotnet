@@ -14,8 +14,8 @@
 | **Swagger UI - C# (Produção)** | https://caneorbis-api-dotnet.onrender.com/swagger |
 | **API Java Base (Produção)** | https://caneorbis-api-java.onrender.com |
 | **API C# Base (Produção)** | https://caneorbis-api-dotnet.onrender.com |
-| **Vídeo de Apresentação (10 min)** | *em breve* |
-| **Video Pitch (3 min)** | *em breve* |
+| **Vídeo de Apresentação (10 min)** | https://www.youtube.com/watch?v=WDscwR_ILag |
+| **Video Pitch (3 min)** | https://youtu.be/0EFYzRW-o-0 |
 
 ---
 
@@ -58,6 +58,26 @@ O projeto é composto por **duas APIs independentes** que compartilham o mesmo b
 ---
 
 # Disciplina 1: Java Advanced
+
+## 🎥 Vídeos
+
+### Vídeo de Apresentação — Arquitetura e Demonstração (até 10 min)
+
+[![Vídeo de Apresentação - CaneOrbit Java](https://img.youtube.com/vi/WDscwR_ILag/maxresdefault.jpg)](https://www.youtube.com/watch?v=WDscwR_ILag)
+
+> **Assista no YouTube:** https://www.youtube.com/watch?v=WDscwR_ILag
+
+---
+
+### Video Pitch (até 3 min)
+
+[![Video Pitch - CaneOrbit](https://img.youtube.com/vi/0EFYzRW-o-0/maxresdefault.jpg)](https://youtu.be/0EFYzRW-o-0)
+
+> **Assista no YouTube:** https://youtu.be/0EFYzRW-o-0
+>
+> **Observação:** Optamos por consolidar a apresentação da solução, arquitetura e pitch em um único vídeo unificado (C#), disponível também no link de apresentação acima.
+
+---
 
 ## 🛠️ Tecnologias Utilizadas (Java)
 
@@ -259,6 +279,7 @@ curl -X POST https://caneorbis-api-java.onrender.com/api/dispositivos \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"macAddress":"AA:BB:CC:DD:EE:FF","apelido":"Sensor 01","latitude":-23.5505,"longitude":-46.6333,"statusDispositivo":"ATIVO","dataInstalacao":"2024-01-15"}'
 ```
+
 ---
 
 ## 📊 Diagramas
